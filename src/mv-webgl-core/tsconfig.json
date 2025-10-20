@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",
+    "outDir": "build",
+    "moduleResolution": "node",
+    "target": "es5",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "types": [
+      "jasmine",
+      "node",
+      "reflect-metadata"
+    ],
+    "lib": [
+      "es2017",
+      "dom"
+    ]
+  },
+  "exclude": [
+    "**/*.spec.ts",
+    "**/dist/**",
+    "output/**"
+  ]
+}

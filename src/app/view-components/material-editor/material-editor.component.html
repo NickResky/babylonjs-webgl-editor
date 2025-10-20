@@ -1,0 +1,79 @@
+<div class="material-editor">
+  <p *ngIf="loading">Loading</p>
+  <button
+    mat-stroked-button
+    *ngIf="!loading && !materialsLoaded"
+    (click)="loadMaterials()"
+  >
+    Load Materials
+  </button>
+  <button
+    mat-stroked-button
+    *ngIf="!loading && materialsLoaded"
+    (click)="unloadMaterials()"
+  >
+    Unload Materials
+  </button>
+  <div *ngIf="!loading && materialsLoaded" class="material-editor__material-types__wrapper">
+    <mat-form-field>
+      <mat-label>Entity</mat-label>
+      <mat-select [value]="activeEntity" (selectionChange)="onChangeEntityClicked($event.value)">
+        <mat-option *ngFor="let entity of entities" [value]="entity">
+          {{entity.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-accordion class="sidebar" multi="true">
+      <mat-expansion-panel class="sidebar-item">
+        <mat-expansion-panel-header>
+          Allocator Materials
+        </mat-expansion-panel-header>
+
+        <div class="material-editor__material-types__allocator">
+          <div class="material-editor__material-types__allocator__header">
+            <button
+              class="material-editor__material-types__allocator__header__button"
+              mat-stroked-button
+              (click)="onNewAllocatorClicked()"
+              matTooltip="Add new Allocator"
+              matTooltipPosition="above"
+              aria-label="Add new Allocator button"
+            >
+              Add new
+            </button>
+          </div>
+
+          <app-allocator-table >
+          </app-allocator-table>
+         
+        </div>
+      </mat-expansion-panel>
+    
+      <mat-expansion-panel class="sidebar-item">
+        <mat-expansion-panel-header>
+          Switch Materials
+        </mat-expansion-panel-header>
+
+        <div class="material-editor__material-types__switch-materials">
+          <app-switch-table>
+          </app-switch-table>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <br />
+  </div>
+  <br />
+  <input #newMaterial type="text" placeholder="Material-Name" [(ngModel)]="newMaterialName" />
+  <app-material-url-picker>
+  </app-material-url-picker>
+  <button (click)="onNewMaterialClicked(false)" [disabled]="newMaterial.value.length < 4">
+    Create new PBR Material
+  </button>
+  <button (click)="onNewMaterialClicked(true)" [disabled]="newMaterial.value.length < 4">
+    Create new Node Material
+  </button>
+
+  <br /><br /><br />
+  <br /><br />
+</div>

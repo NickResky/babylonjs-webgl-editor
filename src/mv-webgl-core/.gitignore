@@ -1,0 +1,28 @@
+tmp
+
+# Coverage reports
+coverage
+
+# Docs
+docs
+
+# Dependency directory
+node_modules
+
+# Editors
+.idea
+*.iml
+.vscode
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Ignore built ts files
+build
+dist
+outputs/**/*
+mv-webgl-core-bundle
+outputs/**/*
+src/**/*.js
+outputs/**/*

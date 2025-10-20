@@ -1,0 +1,103 @@
+{
+    "name": "mv-webgl-core",
+    "version": "2.0.59",
+    "description": "Mackevision WebGL Core project",
+    "module": "index.ts",
+    "scripts": {
+        "start": "npm run watch",
+        "start:cws": "start node cws-proxy/app.js && start npm run watch",
+        "lint": "eslint src/**/*.ts --quiet",
+        "lint:fix": "eslint src/**/*.ts --quiet --fix",
+        "build": "rollup -c",
+        "build:vanillajs": "concurrently \"webpack --config webpack.vanilla.js\" \"webpack --config webpack.resolver.js\"",
+        "oss": "license-report --only=prod --output=html --config license-report-config.json",
+        "docs": "typedoc --out outputs/docs src --readme none",
+        "graph": "madge ./src -i ./outputs/docs/graph.png",
+        "prettier": "prettier --write \"src/**/*.{html,ts,scss,json}\" ",
+        "prettier:check": "prettier --check \"src/**/*.{html,ts,scss,json}\" ",
+        "test": "ts-node node_modules/karma/bin/karma start karma.conf.ts --browsers Chrome",
+        "test:headless": "karma start --browsers Chrome_CustomHeadless --single-run=true",
+        "watch": "webpack-dev-server --open --env dev --port 4300",
+        "watch-host-0000": "webpack-dev-server --open --port 4300 --host 0.0.0.0 --env dev"
+    },
+    "husky": {
+        "hooks": {
+            "DISABLED_____pre-commit": "npx lint-staged"
+        }
+    },
+    "lint-staged": {
+        "src/**/*.ts": [
+            "npm run lint:fix",
+            "git add"
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@sv-str-git002.mvision.lan:realtime/mv-webgl-core.git"
+    },
+    "keywords": [],
+    "author": "Mackevision",
+    "license": "ISC",
+    "dependencies": {
+        "babylonjs": "8.24.0",
+        "babylonjs-loaders": "8.24.0",
+        "babylonjs-materials": "8.24.0",
+        "bowser": "^2.12.1",
+        "inversify": "^7.9.0",
+        "reflect-metadata": "^0.2.2",
+        "rollup": "^2.79.2",
+        "rollup-plugin-cleanup": "^3.2.1",
+        "rollup-plugin-commonjs": "^10.1.0",
+        "rollup-plugin-generate-package-json": "^3.2.0",
+        "rollup-plugin-node-builtins": "^2.1.2",
+        "rollup-plugin-node-globals": "^1.4.0",
+        "rollup-plugin-node-resolve": "^5.2.0",
+        "rollup-plugin-terser": "^7.0.2",
+        "rollup-plugin-typescript2": "^0.36.0",
+        "rxjs": "^7.8.2"
+    },
+    "devDependencies": {
+        "@rollup/plugin-node-resolve": "^16.0.1",
+        "@types/jasmine": "^5.1.9",
+        "@types/karma": "^6.3.9",
+        "@types/node": "^24.3.0",
+        "@types/sinon": "^17.0.4",
+        "@typescript-eslint/eslint-plugin": "^8.41.0",
+        "@typescript-eslint/parser": "^8.41.0",
+        "concurrently": "^9.2.1",
+        "copy-webpack-plugin": "^13.0.1",
+        "eslint": "^9.34.0",
+        "eslint-config-google": "^0.14.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "eslint-plugin-tsdoc": "^0.4.0",
+        "file-loader": "^6.2.0",
+        "html-webpack-plugin": "^5.6.4",
+        "husky": "^9.1.7",
+        "jasmine-core": "^5.9.0",
+        "karma": "^6.4.4",
+        "karma-chrome-launcher": "^3.2.0",
+        "karma-cli": "^2.0.0",
+        "karma-jasmine": "^5.1.0",
+        "karma-jasmine-html-reporter": "^2.1.0",
+        "karma-sinon": "^1.0.5",
+        "karma-typescript": "^5.5.4",
+        "license-report": "^6.8.0",
+        "lint-staged": "^16.1.5",
+        "madge": "^8.0.0",
+        "magic-string": "^0.30.18",
+        "nollup": "^0.21.0",
+        "prettier": "3.6.2",
+        "process": "^0.11.10",
+        "proxyquire": "^2.1.3",
+        "sinon": "^21.0.0",
+        "ts-loader": "^9.5.4",
+        "ts-mock-imports": "^1.3.17",
+        "typedoc": "^0.28.11",
+        "typescript": "^5.9.2",
+        "url-loader": "^4.1.1",
+        "webpack": "^5.101.3",
+        "webpack-cli": "^6.0.1",
+        "webpack-dev-server": "^5.2.2"
+    }
+}

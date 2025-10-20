@@ -1,0 +1,65 @@
+{
+  "_from": "babylonjs-loaders@5.0.0-alpha.37",
+  "_id": "babylonjs-loaders@5.0.0-alpha.37",
+  "_inBundle": false,
+  "_integrity": "sha512-aSdbXocj42pCePGuAxNBh+VQfylllpQ38vrKz+N/XSamoWZKhIo9vYIYuD2qW5/SR7Tuxbrta2wGQJhF+bFa6Q==",
+  "_location": "/babylonjs-loaders",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "babylonjs-loaders@5.0.0-alpha.37",
+    "name": "babylonjs-loaders",
+    "escapedName": "babylonjs-loaders",
+    "rawSpec": "5.0.0-alpha.37",
+    "saveSpec": null,
+    "fetchSpec": "5.0.0-alpha.37"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/babylonjs-loaders/-/babylonjs-loaders-5.0.0-alpha.37.tgz",
+  "_shasum": "845accb9a2da567d4733204bdc6b1048d18cbf9b",
+  "_spec": "babylonjs-loaders@5.0.0-alpha.37",
+  "_where": "D:\\Code\\mv-webgl-core",
+  "author": {
+    "name": "David CATUHE"
+  },
+  "bugs": {
+    "url": "https://github.com/BabylonJS/Babylon.js/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "babylonjs-gltf2interface": "5.0.0-alpha.37"
+  },
+  "deprecated": false,
+  "description": "The Babylon.js file loaders library is an extension you can use to load different 3D file types into a Babylon scene.",
+  "engines": {
+    "node": "*"
+  },
+  "files": [
+    "babylonjs.loaders.js.map",
+    "babylonjs.loaders.js",
+    "babylonjs.loaders.min.js",
+    "babylonjs.loaders.module.d.ts",
+    "readme.md",
+    "package.json"
+  ],
+  "homepage": "https://github.com/BabylonJS/Babylon.js#readme",
+  "keywords": [
+    "3D",
+    "javascript",
+    "html5",
+    "webgl",
+    "loaders"
+  ],
+  "license": "Apache-2.0",
+  "main": "babylonjs.loaders.min.js",
+  "name": "babylonjs-loaders",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BabylonJS/Babylon.js.git"
+  },
+  "typings": "babylonjs.loaders.module.d.ts",
+  "version": "5.0.0-alpha.37"
+}

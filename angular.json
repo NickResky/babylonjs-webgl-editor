@@ -24,6 +24,7 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/assets/c25_ext_body.glb",
               {
                 "glob": "**/*",
                 "input": "public"

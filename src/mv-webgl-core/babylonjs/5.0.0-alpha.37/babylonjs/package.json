@@ -1,0 +1,67 @@
+{
+  "_from": "babylonjs@5.0.0-alpha.37",
+  "_id": "babylonjs@5.0.0-alpha.37",
+  "_inBundle": false,
+  "_integrity": "sha512-xlkNaftJnlk9IiFtYte9LlQkXu9UtGLmzV/URhlMMkcrq5yV4eeR3uf6pOu7nEHNYxt+OHV4ASnZZeuetcOngg==",
+  "_location": "/babylonjs",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "babylonjs@5.0.0-alpha.37",
+    "name": "babylonjs",
+    "escapedName": "babylonjs",
+    "rawSpec": "5.0.0-alpha.37",
+    "saveSpec": null,
+    "fetchSpec": "5.0.0-alpha.37"
+  },
+  "_requiredBy": [
+    "/",
+    "/babylonjs-loaders"
+  ],
+  "_resolved": "https://registry.npmjs.org/babylonjs/-/babylonjs-5.0.0-alpha.37.tgz",
+  "_shasum": "8e92186bc9a13a52cb6dd69c70853816fcf5348b",
+  "_spec": "babylonjs@5.0.0-alpha.37",
+  "_where": "D:\\Code\\mv-webgl-core",
+  "author": {
+    "name": "David CATUHE"
+  },
+  "bugs": {
+    "url": "https://github.com/BabylonJS/Babylon.js/issues"
+  },
+  "bundleDependencies": false,
+  "contributors": [
+    {
+      "name": "Sebastien VANDENBERGHE"
+    }
+  ],
+  "dependencies": {},
+  "deprecated": false,
+  "description": "Babylon.js is a JavaScript 3D engine based on webgl.",
+  "devDependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "esnext": "babylon.js",
+  "files": [
+    "babylon.js",
+    "Oimo.js",
+    "readme.md"
+  ],
+  "homepage": "https://github.com/BabylonJS/Babylon.js#readme",
+  "keywords": [
+    "3D",
+    "javascript",
+    "html5",
+    "webgl"
+  ],
+  "license": "Apache-2.0",
+  "main": "babylon.js",
+  "module": "babylon.js",
+  "name": "babylonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BabylonJS/Babylon.js.git"
+  },
+  "version": "5.0.0-alpha.37"
+}

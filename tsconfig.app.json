@@ -7,9 +7,13 @@
     "types": []
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts", "src/app/services/file-access", "home.component copy.ts",
   ],
   "exclude": [
-    "src/**/*.spec.ts"
+    "node_modules",
+    "src/**/*.spec.ts",
+    "src/mv-webgl-core/sandbox/**/*",
+    "src/mv-webgl-core/playground",
+    "src/mv-webgl-core/babylonjs/**/*"
   ]
 }

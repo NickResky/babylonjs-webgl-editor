@@ -1,0 +1,15 @@
+<mat-table [dataSource]="hotkeyTableDataSource" class="mat-elevation-z8">
+
+    <ng-container matColumnDef="key">
+      <mat-header-cell *matHeaderCellDef> Hotkey </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.key}} </mat-cell>
+    </ng-container>
+  
+    <ng-container matColumnDef="description">
+      <mat-header-cell *matHeaderCellDef> Description </mat-header-cell>
+      <mat-cell *matCellDef="let element"> {{element.description}} </mat-cell>
+    </ng-container>
+  
+    <mat-header-row *matHeaderRowDef="hotkeyTableColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: hotkeyTableColumns;"></mat-row>
+  </mat-table>

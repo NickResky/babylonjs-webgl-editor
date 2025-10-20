@@ -1,0 +1,25 @@
+<div [formGroup]="data.allocatorForm" class="material-editor__material-types__allocator__allocatorForm">
+  <h3>Update Material Mapping</h3>
+  <mat-divider></mat-divider>
+  <p><b>Original Material name :</b> {{ data.mapping.name }}</p>
+
+  <app-material-url-picker [relativeUrl]="data.mapping.mapping" (urlChange)="updateMaterialMappingUrl($event)">
+  </app-material-url-picker>
+
+  <mat-dialog-actions class="material-editor__material-types__allocator__button-wrapper">
+    <button type="submit" (click)="onSaveButtonClick()"
+      class="material-editor__material-types__allocator__header__button" mat-stroked-button
+      matTooltip="Save Changes of the Allocator" matTooltipPosition="above" aria-label="Save Changes button">
+      Save
+    </button>
+    <button type="button" mat-dialog-close class="material-editor__material-types__allocator__header__button"
+      mat-stroked-button matTooltip="Cancel Changes of the Allocator" matTooltipPosition="above"
+      aria-label="Cancel Changes button">
+      Cancel
+    </button>
+  </mat-dialog-actions>
+  <button type="button" class="material-editor__close-button" mat-dialog-close matTooltip="Close dialoge"
+    matTooltipPosition="below" aria-label="Close dialoge button">
+    X
+  </button>
+</div>

@@ -1,0 +1,11 @@
+{
+    "baseDir": "./",
+    "fontSize": "50px",
+    "graphVizOptions": {
+        "G": {
+            "rankdir": "LR"
+        }
+    },
+    "fileExtensions": ["js", "ts"],
+    "excludeRegExp": [".spec.ts$"]
+}

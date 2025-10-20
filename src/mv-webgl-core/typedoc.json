@@ -1,0 +1,8 @@
+{
+    "name": "MV-WebGL-Core",
+    "mode": "file",
+    "out": "docs",
+    "theme": "default",
+    "ignoreCompilerErrors": true,
+    "target": "es5"
+}

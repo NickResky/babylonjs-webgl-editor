@@ -1,0 +1,126 @@
+.material-editor {
+  // Can be removed after table is gone
+  // just a work around to save time
+  margin-left: -20px;
+  margin-right: -20px;
+
+  &__close-button {
+    position: absolute;
+    right: 0;
+    top: -30px;
+    background-color: transparent;
+    color: #000;
+    cursor: pointer;
+    padding: 10px;
+    border: 0;
+  }
+
+  
+  &__header {
+    display: flex;
+    justify-content: flex-end;
+
+    &__button {
+      align-self: center;
+      margin-right: 5px;
+    }
+  }
+
+  &__sheet-filter {
+    display: block;
+    width: 100%;
+  }
+
+  &__allocatorForm {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    min-width: 350px;
+    position: relative;
+  }
+
+  &__select {
+    display: block;
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  &__button-wrapper {
+    display: flex;
+    justify-content: center;
+  }
+
+  &__sheet-wrapper {
+    padding: 1px;
+
+  }
+    
+  &__sheet {
+    width: 100%;
+    table-layout: fixed;
+    margin-top: 15px;
+
+    &__header {
+      font-size: 16px;
+      font-weight: 700;
+      background-color: whitesmoke;
+      cursor: pointer;
+    }
+
+    &__cell {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      padding: 2px;
+      cursor: help;
+
+      &--action {
+        width: 10%;
+      }
+    }
+
+    &__button-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  &__url-picker {
+      display: flex;
+      align-items: center;
+      mat-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 12rem;
+        margin: 0 1rem;
+        direction: rtl;
+        text-align: left;
+      }
+      mat-label {
+        cursor: help;
+      }
+      b {
+        white-space: nowrap;
+      }
+      &__close-btn {
+        margin-right: 5px;
+      }
+  }
+
+  // &__switch-materials {
+  //   padding: 1px;
+
+  //   &__element {
+  //     margin-bottom: 5px;
+  //     margin-top: 8px;
+
+  //     &__id {
+  //       font-size: 18px;
+  //       font-weight: 700;
+  //       padding: 5px;
+  //     }
+  //   }
+  // }
+
+}

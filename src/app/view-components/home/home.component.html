@@ -1,0 +1,65 @@
+<!-- {{ 'PAGES.HOME.TITLE' | translate }} -->
+<div #canvascontainerwrapper id="canvas-container-wrapper" class="">
+  <!-- <div class="mobile-container__outer" [ngClass]="{'mobile-is-active': mobileViewActive}">
+  <div>
+    <mat-form-field *ngIf="mobileViewActive" class="mobile-view-scale" appearance="fill">
+      <mat-label>Scale</mat-label>
+      <mat-select [(value)]="mobileViewScale">
+        <mat-option [value]="1">
+          100%
+        </mat-option>
+        <mat-option [value]="0.75">
+          75%
+        </mat-option>
+        <mat-option [value]="0.5">
+          50%
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div id="mobile-container"
+  [ngStyle]="{'transform': 'scale(' + (mobileViewActive ? mobileViewScale : 1) + ')'}">
+    <div class="mobile-container__inner">
+      <div #canvascontainer id="canvas-container"></div>
+    </div>
+  <button
+    matTooltip="Switch between mobile and desktop view"
+    (click)="toggleMobileView()"
+    mat-stroked-button
+    class="mobile-button"
+  >
+    <mat-icon *ngIf="!mobileViewActive">smartphone</mat-icon>
+    <mat-icon *ngIf="mobileViewActive">computer</mat-icon>
+  </button>
+  </div>
+</div> -->
+</div>
+<div class="loading-background" *ngIf="showLoadingBackground && false"></div>
+<div class="loading-screen" *ngIf="loading && false">
+  <div class="loader">
+    <div class="lds-ring">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <div
+      *ngIf="!entityInitiallyLoaded && loadingProgress && loadingProgress !== 100"
+      class="loading-progress"
+    >
+      {{ loadingProgress }}%
+    </div>
+    <div
+      *ngIf="!entityInitiallyLoaded && entityBaseUrl && !loadingProgress && loadingProgress !== 100"
+      class="loading-progress"
+    >
+      Loading entity <br />
+      <span class="entity-url">{{ entityUrl }}</span>
+    </div>
+  </div>
+</div>
+<!-- <app-slider-textinput
+  [debugLayer]="debugLayer"
+  [scene]="scene"
+  [elmRef]="actionTabsContainer"
+  [closeInput]="closeInputField"></app-slider-textinput> -->
