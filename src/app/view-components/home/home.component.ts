@@ -205,9 +205,9 @@ export class HomeComponent implements AfterViewInit {
             this.scene,
             this.canvasContainerWrapper?.nativeElement
         );
-        this.scene.debugLayer.show({
-            embedMode: true // optional: shows embedded instead of popup
-        });
+        // this.scene.debugLayer.show({
+        //     embedMode: true // optional: shows embedded instead of popup
+        // });
         // this.debugLayer = this.scene.debugLayer;
         this.dataService.setCore(this.core);
         // this.actionTabsContainer = this.elmRef.nativeElement.querySelector('#actionTabs');
@@ -232,13 +232,16 @@ export class HomeComponent implements AfterViewInit {
 
             switch (key.code) {
                 case 'KeyI': {
-                    if (this.inspectorOpen) {
-                        this.scene.debugLayer.show();
-                    } else {
-                        this.scene.debugLayer.hide();
-                    }
+                    // if (this.inspectorOpen) {
+                    //     this.scene.debugLayer.show();
+                    // } else {
+                    //     this.scene.debugLayer.hide();
+                    // }
                     this.inspectorOpen = !this.inspectorOpen;
-                    // this.inspectorService.toggleInspector(this.scene, this.canvasContainerWrapper.nativeElement);
+                    this.inspectorService.toggleInspector(
+                        this.scene,
+                        this.canvasContainerWrapper.nativeElement
+                    );
                     break;
                 }
                 case 'KeyF': {
