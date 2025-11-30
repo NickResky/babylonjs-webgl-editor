@@ -11,7 +11,7 @@ import {
     Scene,
     Texture,
     TransformNode,
-    VertexBuffer,
+    VertexBuffer
 } from 'babylonjs';
 import { inject, injectable } from 'inversify';
 import { Subject } from 'rxjs';
@@ -32,20 +32,23 @@ import {
     TEXTURE_PROPERTIES,
     timeout,
     unfreezeMaterials,
-    waitForSceneReady,
+    waitForSceneReady
 } from '../helper';
 import { FileType } from '../helper/file-types.helper';
 import { TYPES } from '../ioc/types';
 import { CoreError, MVLogger } from '../logging';
 import { PlayAnimationOptions, TextureAndMaterialUrls } from '../models';
 import { MVAnimation } from '../models/animation/MVAnimation';
-import { MVMaterialMappingsJson, MVRuleEngineTypes } from '../models/configuration/interfaces';
+import {
+    MVMaterialMappingsJson,
+    MVRuleEngineTypes
+} from '../models/configuration/interfaces';
 import {
     MVAnimationMetaData,
     MVEntityConfig,
     MVMeshSetting,
     MVMeshSettingsJson,
-    MVProductionMeshSettingsJson,
+    MVProductionMeshSettingsJson
 } from '../models/entity/interfaces';
 import { MVEntity } from '../models/entity/mv-entity';
 import { MVEnvironmentEntity } from '../models/entity/mv-environment-entity';
@@ -81,24 +84,31 @@ export class EntityService {
      */
     constructor(
         @inject(TYPES.Scene) private _scene: Scene,
-        @inject(TYPES.ConfigurationService) private _configurationService: ConfigurationService,
+        @inject(TYPES.ConfigurationService)
+        private _configurationService: ConfigurationService,
         @inject(TYPES.MeshService) private _meshService: MeshService,
-        @inject(TYPES.AssetLoaderService) private _assetLoader: AssetLoaderService,
+        @inject(TYPES.AssetLoaderService)
+        private _assetLoader: AssetLoaderService,
         @inject(TYPES.LightService) private _lightService: LightService,
-        @inject(TYPES.MaterialService) private _materialService: MaterialService,
-        @inject(TYPES.SceneSettingsService) private _sceneSettingsService: SceneSettingsService,
+        @inject(TYPES.MaterialService)
+        private _materialService: MaterialService,
+        @inject(TYPES.SceneSettingsService)
+        private _sceneSettingsService: SceneSettingsService,
         @inject(TYPES.CoreSettings) private _coreSettings: CoreSettings,
-        @inject(TYPES.TextureService) private _textureService: TextureService,
+        @inject(TYPES.TextureService) private _textureService: TextureService
     ) {}
 
-    public async loadAnimation(entity: MVEntity, animationMetaData: MVAnimationMetaData): Promise<void> {
+    public async loadAnimation(
+        entity: MVEntity,
+        animationMetaData: MVAnimationMetaData
+    ): Promise<void> {
         const animationsPath = entity.entityConfig.entityConfigBaseUrl;
         let animationGroups: AnimationGroup[];
         try {
             animationGroups = await this._assetLoader.loadAnimationGroups(
                 animationsPath,
                 animationMetaData.fileUrl,
-                entity,
+                entity
             );
         } catch (error) {
             MVLogger.error(`Failed loading animation ${animationMetaData.id}`);
@@ -108,26 +118,44 @@ export class EntityService {
             if (animationMetaData.id) {
                 animationId = animationMetaData.id;
             }
-            const clonedAnimationGroup = animationGroup.clone(animationId, (oldTarget: any) => {
-                let targetNode;
-                if (oldTarget?.id) {
-                    targetNode = getChildNodeById(entity.rootNode, oldTarget.id);
+            const clonedAnimationGroup = animationGroup.clone(
+                animationId,
+                (oldTarget: any) => {
+                    let targetNode;
+                    if (oldTarget?.id) {
+                        targetNode = getChildNodeById(
+                            entity.rootNode,
+                            oldTarget.id
+                        );
+                    }
+                    return targetNode;
                 }
-                return targetNode;
-            });
+            );
             // By default animations should not loop
             clonedAnimationGroup.loopAnimation = false;
-            entity.addAnimation(new MVAnimation(clonedAnimationGroup, animationMetaData.speedRatio));
+            entity.addAnimation(
+                new MVAnimation(
+                    clonedAnimationGroup,
+                    animationMetaData.speedRatio
+                )
+            );
             animationGroup.dispose();
         });
     }
 
     public async setupAnimations(entity: MVEntity): Promise<void> {
         const promises = [];
-        if (entity.entityConfig.animations && entity.entityConfig.animations.length > 0) {
-            entity.entityConfig?.animations?.forEach((animationMetaData: MVAnimationMetaData) => {
-                promises.push(this.loadAnimation(entity, animationMetaData));
-            });
+        if (
+            entity.entityConfig.animations &&
+            entity.entityConfig.animations.length > 0
+        ) {
+            entity.entityConfig?.animations?.forEach(
+                (animationMetaData: MVAnimationMetaData) => {
+                    promises.push(
+                        this.loadAnimation(entity, animationMetaData)
+                    );
+                }
+            );
         }
         await Promise.all(promises);
     }
@@ -144,7 +172,7 @@ export class EntityService {
             try {
                 entity.rig = await this._assetLoader.loadRig(
                     entity.entityConfig.entityConfigBaseUrl,
-                    entity.entityConfig.rigUrlRelative,
+                    entity.entityConfig.rigUrlRelative
                 );
                 entity.rig.forEach((node: Node) => {
                     if (node.id === '__root__') {
@@ -157,32 +185,49 @@ export class EntityService {
                 });
             } catch (error) {
                 MVLogger.error(
-                    `Failed loading rig ${entity.entityConfig.entityConfigBaseUrl}${entity.entityConfig.rigUrlRelative}`,
+                    `Failed loading rig ${entity.entityConfig.entityConfigBaseUrl}${entity.entityConfig.rigUrlRelative}`
                 );
             }
         }
     }
 
     public mv_loadConfigs(entity: MVEntity): void {
-        entity.texturesBaseUrl = entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.texturesUrlRelative;
-        if (this._coreSettings.useMobileAssets && entity.entityConfig.mobileTexturesUrlRelative) {
+        entity.texturesBaseUrl =
+            entity.entityConfig.entityConfigBaseUrl +
+            entity.entityConfig.texturesUrlRelative;
+        if (
+            this._coreSettings.useMobileAssets &&
+            entity.entityConfig.mobileTexturesUrlRelative
+        ) {
             entity.texturesBaseUrl =
-                entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.mobileTexturesUrlRelative;
+                entity.entityConfig.entityConfigBaseUrl +
+                entity.entityConfig.mobileTexturesUrlRelative;
         }
         entity.meshesUrlRelative = entity.entityConfig.meshesUrlRelative;
-        if (this._coreSettings.productionMode && entity.entityConfig.productionMeshesUrlRelative) {
-            entity.meshesUrlRelative = entity.entityConfig.productionMeshesUrlRelative;
+        if (
+            this._coreSettings.productionMode &&
+            entity.entityConfig.productionMeshesUrlRelative
+        ) {
+            entity.meshesUrlRelative =
+                entity.entityConfig.productionMeshesUrlRelative;
         }
-        entity.meshesBaseUrl = entity.entityConfig.entityConfigBaseUrl + entity.meshesUrlRelative;
+        entity.meshesBaseUrl =
+            entity.entityConfig.entityConfigBaseUrl + entity.meshesUrlRelative;
 
         if (entity.entityConfig.lightmapTexturesUrlRelative) {
-            entity.lightmapTexturesUrlRelative = entity.entityConfig.lightmapTexturesUrlRelative;
-            if (this._coreSettings.useMobileAssets && entity.entityConfig.mobileLightmapTexturesUrlRelative) {
-                entity.lightmapTexturesUrlRelative = entity.entityConfig.mobileLightmapTexturesUrlRelative;
+            entity.lightmapTexturesUrlRelative =
+                entity.entityConfig.lightmapTexturesUrlRelative;
+            if (
+                this._coreSettings.useMobileAssets &&
+                entity.entityConfig.mobileLightmapTexturesUrlRelative
+            ) {
+                entity.lightmapTexturesUrlRelative =
+                    entity.entityConfig.mobileLightmapTexturesUrlRelative;
             }
 
             entity.lightmapArrayJSON =
-                this._coreSettings.useMobileAssets && entity.entityConfig.mobileLightmapTexturesUrlRelative
+                this._coreSettings.useMobileAssets &&
+                entity.entityConfig.mobileLightmapTexturesUrlRelative
                     ? entity.mv_mobileLightmapTextures
                     : entity.mv_lightmapTextures;
         }
@@ -192,76 +237,113 @@ export class EntityService {
      * Load config files for the entity (rule engine, mesh settings, materialMappings)
      */
     public async loadConfigs(entity: MVEntity): Promise<void> {
-        entity.texturesBaseUrl = entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.texturesUrlRelative;
-        if (this._coreSettings.useMobileAssets && entity.entityConfig.mobileTexturesUrlRelative) {
+        entity.texturesBaseUrl =
+            entity.entityConfig.entityConfigBaseUrl +
+            entity.entityConfig.texturesUrlRelative;
+        if (
+            this._coreSettings.useMobileAssets &&
+            entity.entityConfig.mobileTexturesUrlRelative
+        ) {
             entity.texturesBaseUrl =
-                entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.mobileTexturesUrlRelative;
+                entity.entityConfig.entityConfigBaseUrl +
+                entity.entityConfig.mobileTexturesUrlRelative;
         }
         entity.meshesUrlRelative = entity.entityConfig.meshesUrlRelative;
-        if (this._coreSettings.productionMode && entity.entityConfig.productionMeshesUrlRelative) {
-            entity.meshesUrlRelative = entity.entityConfig.productionMeshesUrlRelative;
+        if (
+            this._coreSettings.productionMode &&
+            entity.entityConfig.productionMeshesUrlRelative
+        ) {
+            entity.meshesUrlRelative =
+                entity.entityConfig.productionMeshesUrlRelative;
         }
-        entity.meshesBaseUrl = entity.entityConfig.entityConfigBaseUrl + entity.meshesUrlRelative;
+        entity.meshesBaseUrl =
+            entity.entityConfig.entityConfigBaseUrl + entity.meshesUrlRelative;
 
         if (entity.entityConfig.ruleEngineType == MVRuleEngineTypes.JSON) {
             if (!entity.entityConfig.ruleEngineConfigUrlRelative) {
                 MVLogger.fatal(
                     CoreError.InvalidConfigurationError,
-                    `No entityConfigUrlRelative defined for ${entity.name}`,
+                    `No entityConfigUrlRelative defined for ${entity.name}`
                 );
             }
             const ruleEngineJsonUrl =
-                entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.ruleEngineConfigUrlRelative;
+                entity.entityConfig.entityConfigBaseUrl +
+                entity.entityConfig.ruleEngineConfigUrlRelative;
             entity.ruleEngineJson = await loadJson(ruleEngineJsonUrl);
         }
 
-        if (this._coreSettings.productionMode && entity.entityConfig.productionMeshSettingsRelative) {
+        if (
+            this._coreSettings.productionMode &&
+            entity.entityConfig.productionMeshSettingsRelative
+        ) {
             const productionMeshSettingsJsonUrl =
-                entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.productionMeshSettingsRelative;
+                entity.entityConfig.entityConfigBaseUrl +
+                entity.entityConfig.productionMeshSettingsRelative;
             entity.productionMeshSettingsJson =
-                await loadJson<MVProductionMeshSettingsJson>(productionMeshSettingsJsonUrl);
+                await loadJson<MVProductionMeshSettingsJson>(
+                    productionMeshSettingsJsonUrl
+                );
         } else if (entity.entityConfig.meshSettingsRelative) {
             const meshSettingsJsonUrl =
-                entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.meshSettingsRelative;
-            entity.meshSettingsJson = await loadJson<MVMeshSettingsJson>(meshSettingsJsonUrl);
+                entity.entityConfig.entityConfigBaseUrl +
+                entity.entityConfig.meshSettingsRelative;
+            entity.meshSettingsJson =
+                await loadJson<MVMeshSettingsJson>(meshSettingsJsonUrl);
         }
 
         if (entity.entityConfig.lightmapTexturesUrlRelative) {
-            entity.lightmapTexturesUrlRelative = entity.entityConfig.lightmapTexturesUrlRelative;
-            if (this._coreSettings.useMobileAssets && entity.entityConfig.mobileLightmapTexturesUrlRelative) {
-                entity.lightmapTexturesUrlRelative = entity.entityConfig.mobileLightmapTexturesUrlRelative;
+            entity.lightmapTexturesUrlRelative =
+                entity.entityConfig.lightmapTexturesUrlRelative;
+            if (
+                this._coreSettings.useMobileAssets &&
+                entity.entityConfig.mobileLightmapTexturesUrlRelative
+            ) {
+                entity.lightmapTexturesUrlRelative =
+                    entity.entityConfig.mobileLightmapTexturesUrlRelative;
             }
             const lightmapTexturesRegistryUrl =
-                entity.entityConfig.entityConfigBaseUrl + entity.lightmapTexturesUrlRelative + 'registry.json';
-            const lightmapTexturesRegistryResponse = await loadJson<any>(lightmapTexturesRegistryUrl);
+                entity.entityConfig.entityConfigBaseUrl +
+                entity.lightmapTexturesUrlRelative +
+                'registry.json';
+            const lightmapTexturesRegistryResponse = await loadJson<any>(
+                lightmapTexturesRegistryUrl
+            );
             entity.lightmapArrayJSON = lightmapTexturesRegistryResponse?.files;
         }
 
         if (entity.entityConfig.materialMappingsUrlRelative) {
             const materialMappingsJsonUrl =
-                entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.materialMappingsUrlRelative;
-            entity.materialMappingsJson = await loadJson(materialMappingsJsonUrl);
+                entity.entityConfig.entityConfigBaseUrl +
+                entity.entityConfig.materialMappingsUrlRelative;
+            entity.materialMappingsJson = await loadJson(
+                materialMappingsJsonUrl
+            );
         }
 
         if (entity.entityConfig.glbMaterialMappingUrlRelative) {
             const glbMaterialMappingUrl =
-                entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.glbMaterialMappingUrlRelative;
+                entity.entityConfig.entityConfigBaseUrl +
+                entity.entityConfig.glbMaterialMappingUrlRelative;
             entity.glbMaterialMapping = await loadJson(glbMaterialMappingUrl);
         }
     }
 
-    public async loadNonConfigurableLayerWithoutUncompressing(entity: MVEntity): Promise<AssetContainerResult | undefined> {
+    public async loadNonConfigurableLayerWithoutUncompressing(
+        entity: MVEntity
+    ): Promise<AssetContainerResult | undefined> {
         if (!entity.mv_ruleEngineConfig?.nonConfigurableFileName) {
             return undefined;
         }
         const nonConfigurableFileName = `${entity.mv_ruleEngineConfig?.nonConfigurableFileName}.glb`;
         if (!nonConfigurableFileName) return undefined;
-        const uncompressedPromise = this._assetLoader.loadAssetContainerWithoutUncompressing(
-            entity.meshesBaseUrl,
-            nonConfigurableFileName,
-            this._scene,
-        );
-        entity.loadNonConfigurableAssetContainerWithoutUncompressingPromise = uncompressedPromise;
+        const uncompressedPromise =
+            this._assetLoader.loadAssetContainerWithoutUncompressing(
+                entity.meshesBaseUrl,
+                nonConfigurableFileName,
+                this._scene
+            );
+        entity.loadNonConfigurableAssetContainerWithoutUncompressingPromise =
+            uncompressedPromise;
         return uncompressedPromise;
     }
 
@@ -275,7 +357,9 @@ export class EntityService {
         this.resetLoadingStatus(entity);
 
         const updatedHiddenLayers = entity.layers.filter(
-            (layer) => layer.previousVisibilityState == true && layer.visibilityState == false,
+            (layer) =>
+                layer.previousVisibilityState == true &&
+                layer.visibilityState == false
         );
 
         // If you are disposing a large number of meshes in a row,
@@ -289,43 +373,68 @@ export class EntityService {
             updatedHiddenLayer.previousVisibilityState = false;
             updatedHiddenLayer.visibilityState = false;
             // console.log('Disposing layer ' + updatedHiddenLayer.name)
-            await disposeLayer(updatedHiddenLayer, this._scene, entity, this._coreSettings.enableLazyLoading);
+            await disposeLayer(
+                updatedHiddenLayer,
+                this._scene,
+                entity,
+                this._coreSettings.enableLazyLoading
+            );
         }
 
         this._scene.blockfreeActiveMeshesAndRenderingGroups = false;
 
         const updatedVisibleLayers = entity.layers.filter(
-            (layer) => layer.previousVisibilityState == false && layer.visibilityState == true,
+            (layer) =>
+                layer.previousVisibilityState == false &&
+                layer.visibilityState == true
         );
 
-        const layersWithTexturesToLoad = this._coreSettings.enableLazyLoading ? entity.layers : updatedVisibleLayers;
+        const layersWithTexturesToLoad = this._coreSettings.enableLazyLoading
+            ? entity.layers
+            : updatedVisibleLayers;
 
-        const textureAndMaterialUrls = this.getTextureAndMaterialUrls(entity, layersWithTexturesToLoad);
+        const textureAndMaterialUrls = this.getTextureAndMaterialUrls(
+            entity,
+            layersWithTexturesToLoad
+        );
 
         entity.loadingStatus.totalAssetsToLoad +=
-            textureAndMaterialUrls.textureJsons.length + textureAndMaterialUrls.lightmapsUrls.length;
+            textureAndMaterialUrls.textureJsons.length +
+            textureAndMaterialUrls.lightmapsUrls.length;
 
         const loadMeshesWithoutUncompressingPromises = [];
         const loadMeshesWithUncompressingPromises = [];
 
         for (const layer of entity.layers) {
-            const isUpdatedVisibleLayer = layer.previousVisibilityState == false && layer.visibilityState == true;
+            const isUpdatedVisibleLayer =
+                layer.previousVisibilityState == false &&
+                layer.visibilityState == true;
 
             for (const layerPath of layer.layerPaths) {
                 const layerWasLazyLoaded = layer.assetContainers.length > 0;
 
                 if (isUpdatedVisibleLayer && layerWasLazyLoaded) {
                     for (const assetContainer of layer.assetContainers) {
-                        await this.processMeshes(entity, layerPath, layer, assetContainer.meshes);
+                        await this.processMeshes(
+                            entity,
+                            layerPath,
+                            layer,
+                            assetContainer.meshes
+                        );
                     }
                     continue;
                 }
 
-                if (isUpdatedVisibleLayer || (this._coreSettings.enableLazyLoading && !layerWasLazyLoaded)) {
+                if (
+                    isUpdatedVisibleLayer ||
+                    (this._coreSettings.enableLazyLoading &&
+                        !layerWasLazyLoaded)
+                ) {
                     entity.loadingStatus.totalAssetsToLoad++;
                     let loadMeshesWithoutUncompressingPromise: Promise<AssetContainerResult>;
 
-                    const nonConfigurableFileName = entity.mv_ruleEngineConfig.nonConfigurableFileName;
+                    const nonConfigurableFileName =
+                        entity.mv_ruleEngineConfig.nonConfigurableFileName;
                     if (
                         entity.loadNonConfigurableAssetContainerWithoutUncompressingPromise &&
                         nonConfigurableFileName &&
@@ -338,14 +447,18 @@ export class EntityService {
                             this._assetLoader.loadAssetContainerWithoutUncompressing(
                                 entity.meshesBaseUrl,
                                 layerPath,
-                                this._scene,
+                                this._scene
                             );
                     }
 
-                    loadMeshesWithoutUncompressingPromises.push(loadMeshesWithoutUncompressingPromise);
+                    loadMeshesWithoutUncompressingPromises.push(
+                        loadMeshesWithoutUncompressingPromise
+                    );
                     loadMeshesWithUncompressingPromises.push(
                         loadMeshesWithoutUncompressingPromise.then(
-                            async (assetContainerResult: AssetContainerResult) => {
+                            async (
+                                assetContainerResult: AssetContainerResult
+                            ) => {
                                 const assetContainer: AssetContainer =
                                     await assetContainerResult.uncompressedAssetContainer;
 
@@ -353,13 +466,18 @@ export class EntityService {
                                     layer.assetContainers.push(assetContainer);
 
                                     if (isUpdatedVisibleLayer) {
-                                        await this.processMeshes(entity, layerPath, layer, assetContainer.meshes);
+                                        await this.processMeshes(
+                                            entity,
+                                            layerPath,
+                                            layer,
+                                            assetContainer.meshes
+                                        );
                                     }
                                 }
 
                                 this.incrementLoadedAssetCount(entity);
-                            },
-                        ),
+                            }
+                        )
                     );
                 }
             }
@@ -378,40 +496,58 @@ export class EntityService {
             entity,
             textureAndMaterialUrls.textureJsons,
             textureAndMaterialUrls.lightmapsUrls,
-            textureAndMaterialUrls.materialsUrls,
+            textureAndMaterialUrls.materialsUrls
         );
         // } else {
         //   preloadTexturesPromise = this.preloadRemainingTextures(entity);
         // }
 
-        await Promise.all([...loadMeshesWithUncompressingPromises, preloadTexturesPromise]);
-
+        await Promise.all([
+            ...loadMeshesWithUncompressingPromises,
+            preloadTexturesPromise
+        ]);
     }
 
-    public async lazyLoadRemainingLayersAndTextures(entity: MVEntity): Promise<any> {
+    public async lazyLoadRemainingLayersAndTextures(
+        entity: MVEntity
+    ): Promise<any> {
         if (!this._coreSettings.enableLazyLoading) return;
 
         const lazyLoadingStartTimeInMs = Date.now();
 
         const loadLayersPromise = this.preloadHiddenLayers(entity).then(() => {
-            const layerLazyLoadingTimeInS = (Date.now() - lazyLoadingStartTimeInMs) / 1000;
-            MVLogger.debug(`Entity Service: Layer lazy loading time in seconds: ${layerLazyLoadingTimeInS}`);
+            const layerLazyLoadingTimeInS =
+                (Date.now() - lazyLoadingStartTimeInMs) / 1000;
+            MVLogger.debug(
+                `Entity Service: Layer lazy loading time in seconds: ${layerLazyLoadingTimeInS}`
+            );
         });
 
         const textureLazyLoadingStartTimeInMs = Date.now();
-        const loadTexturesPromise = this.preloadRemainingTextures(entity, false).then(() => {
-            const textureLazyLoadingTimeInS = (Date.now() - textureLazyLoadingStartTimeInMs) / 1000;
-            MVLogger.debug(`Entity Service: Texture lazy loading time in seconds: ${textureLazyLoadingTimeInS}`);
+        const loadTexturesPromise = this.preloadRemainingTextures(
+            entity,
+            false
+        ).then(() => {
+            const textureLazyLoadingTimeInS =
+                (Date.now() - textureLazyLoadingStartTimeInMs) / 1000;
+            MVLogger.debug(
+                `Entity Service: Texture lazy loading time in seconds: ${textureLazyLoadingTimeInS}`
+            );
         });
 
         await Promise.all([loadTexturesPromise, loadLayersPromise]);
 
-        const lazyLoadingTimeInS = (Date.now() - lazyLoadingStartTimeInMs) / 1000;
-        MVLogger.debug(`Entity Service: Total lazy loading time in seconds: ${lazyLoadingTimeInS}`);
+        const lazyLoadingTimeInS =
+            (Date.now() - lazyLoadingStartTimeInMs) / 1000;
+        MVLogger.debug(
+            `Entity Service: Total lazy loading time in seconds: ${lazyLoadingTimeInS}`
+        );
     }
 
     private async preloadHiddenLayersWithAsyncPool(entity: MVEntity) {
-        const hiddenLayers = entity.layers.filter((layer) => layer.visibilityState == false);
+        const hiddenLayers = entity.layers.filter(
+            (layer) => layer.visibilityState == false
+        );
 
         const layerLoadingParams = [];
 
@@ -420,7 +556,7 @@ export class EntityService {
                 layerLoadingParams.push({
                     url: entity.meshesBaseUrl,
                     fileName: layerPath,
-                    layer: layer,
+                    layer: layer
                 });
             }
         }
@@ -429,7 +565,9 @@ export class EntityService {
     }
 
     private async preloadHiddenLayers(entity: MVEntity) {
-        const hiddenLayers = entity.layers.filter((layer) => layer.visibilityState == false);
+        const hiddenLayers = entity.layers.filter(
+            (layer) => layer.visibilityState == false
+        );
 
         const loadLayerPromises: Promise<any>[] = [];
 
@@ -454,7 +592,10 @@ export class EntityService {
      * @param layer -
      *
      */
-    private async applyMeshesToLayer(entity: MVEntity, layer: MVLayer): Promise<MVLayer> {
+    private async applyMeshesToLayer(
+        entity: MVEntity,
+        layer: MVLayer
+    ): Promise<MVLayer> {
         // Load .glb file with all meshes for this layer
         const loadMeshesPromises: Promise<any>[] = [];
         for (const layerPath of layer.layerPaths) {
@@ -468,7 +609,10 @@ export class EntityService {
         return layer;
     }
 
-    public getTextureAndMaterialUrls(entity: MVEntity, layers: MVLayer[]): TextureAndMaterialUrls {
+    public getTextureAndMaterialUrls(
+        entity: MVEntity,
+        layers: MVLayer[]
+    ): TextureAndMaterialUrls {
         const lightmapUrlsMap = {};
         const materialUrlsMap = {};
 
@@ -476,11 +620,12 @@ export class EntityService {
             return {
                 textureJsons: [],
                 lightmapsUrls: [],
-                materialsUrls: [],
+                materialsUrls: []
             };
 
         layers.forEach((layer: MVLayer) => {
-            const lightmapFileNames = entity.entityConfig.lightmapTexturesUrlRelative
+            const lightmapFileNames = entity.entityConfig
+                .lightmapTexturesUrlRelative
                 ? entity.mv_glbMetaData[layer.name]?.lightmaps
                 : [];
             if (lightmapFileNames) {
@@ -491,9 +636,11 @@ export class EntityService {
             const materialNames = entity.mv_glbMetaData[layer.name]?.materials;
             if (materialNames) {
                 for (let materialName in materialNames) {
-                    const materialMapping: MVMaterialMapping = entity.materialMappings.get(materialName);
+                    const materialMapping: MVMaterialMapping =
+                        entity.materialMappings.get(materialName);
                     if (materialMapping && materialMapping.mapping) {
-                        materialUrlsMap[materialMapping.mapping] = materialMapping.mapping;
+                        materialUrlsMap[materialMapping.mapping] =
+                            materialMapping.mapping;
                     }
                 }
             }
@@ -501,18 +648,19 @@ export class EntityService {
 
         const materialUrls: string[] = Object.keys(materialUrlsMap);
 
-        const textureUrlsToTextureJsonMapping = this.materialUrlsToTextureJsonMapping(entity, materialUrls);
+        const textureUrlsToTextureJsonMapping =
+            this.materialUrlsToTextureJsonMapping(entity, materialUrls);
 
         return {
             textureJsons: Object.values(textureUrlsToTextureJsonMapping),
             lightmapsUrls: Object.keys(lightmapUrlsMap),
-            materialsUrls: materialUrls,
+            materialsUrls: materialUrls
         };
     }
 
     public materialUrlsToTextureJsonMapping(
         entity: MVEntity,
-        materialUrls: string[],
+        materialUrls: string[]
     ): {
         [key: string]: TextureJSON;
     } {
@@ -523,8 +671,13 @@ export class EntityService {
         materialUrls.forEach((materialUrlRelative: string) => {
             const materialJson = entity.mv_materials[materialUrlRelative];
             TEXTURE_PROPERTIES.forEach((textureProperty: string) => {
-                const textureJson: TextureJSON = materialJson ? materialJson[textureProperty] : null;
-                const textureKey = getTextureKeyFromJson(textureJson, entity.entityConfig.entityConfigBaseUrl);
+                const textureJson: TextureJSON = materialJson
+                    ? materialJson[textureProperty]
+                    : null;
+                const textureKey = getTextureKeyFromJson(
+                    textureJson,
+                    entity.entityConfig.entityConfigBaseUrl
+                );
                 if (textureKey) {
                     textureUrlsToTextureJsonMapping[textureKey] = textureJson;
                 }
@@ -554,24 +707,32 @@ export class EntityService {
         entity: MVEntity,
         textureJsons: TextureJSON[],
         lightmapUrls: string[],
-        materialUrls: string[],
+        materialUrls: string[]
     ): Promise<any> {
-        const loadLightmapPromises: Promise<any>[] = lightmapUrls.map((lightmapUrl) => {
-            return this.createLightmapTexture({
-                entity: entity,
-                lightmapFileName: lightmapUrl,
-            }).then((texture) => {
-                this.incrementLoadedAssetCount(entity);
-                return texture;
-            });
-        });
+        const loadLightmapPromises: Promise<any>[] = lightmapUrls.map(
+            (lightmapUrl) => {
+                return this.createLightmapTexture({
+                    entity: entity,
+                    lightmapFileName: lightmapUrl
+                }).then((texture) => {
+                    this.incrementLoadedAssetCount(entity);
+                    return texture;
+                });
+            }
+        );
 
-        const loadTexturePromises: Promise<any>[] = textureJsons.map((textureJson) => {
-            return jsonToTexture(textureJson, this._scene, entity.texturesBaseUrl).then((texture) => {
-                this.incrementLoadedAssetCount(entity);
-                return texture;
-            });
-        });
+        const loadTexturePromises: Promise<any>[] = textureJsons.map(
+            (textureJson) => {
+                return jsonToTexture(
+                    textureJson,
+                    this._scene,
+                    entity.texturesBaseUrl
+                ).then((texture) => {
+                    this.incrementLoadedAssetCount(entity);
+                    return texture;
+                });
+            }
+        );
 
         await Promise.all(loadTexturePromises);
 
@@ -582,7 +743,9 @@ export class EntityService {
         await Promise.all([...loadLightmapPromises, ...loadMaterialPromises]);
     }
 
-    public async preloadRemainingTexturesWithAsyncPool(entity: MVEntity): Promise<any> {
+    public async preloadRemainingTexturesWithAsyncPool(
+        entity: MVEntity
+    ): Promise<any> {
         const maxParallelLoadingCount = 1;
 
         const lightmapPromiseParams = [];
@@ -592,7 +755,7 @@ export class EntityService {
                 lightmapPromiseParams.push({
                     entity: entity,
                     lightmapFileName: lightmapUrl,
-                    removeFromScene: true,
+                    removeFromScene: true
                 });
             }
         }
@@ -600,7 +763,9 @@ export class EntityService {
         // await asyncPool(maxParallelLoadingCount, lightmapPromiseParams, this.createLightmapTexture.bind(this));
 
         const allMaterialUrls = Object.keys(entity.mv_materials);
-        const textureJsons = Object.values(this.materialUrlsToTextureJsonMapping(entity, allMaterialUrls));
+        const textureJsons = Object.values(
+            this.materialUrlsToTextureJsonMapping(entity, allMaterialUrls)
+        );
 
         const texturePromiseParams = [];
 
@@ -609,31 +774,41 @@ export class EntityService {
                 json: textureJson,
                 scene: this._scene,
                 baseUrl: entity.texturesBaseUrl,
-                removeFromScene: true,
+                removeFromScene: true
             });
         }
 
         // await asyncPool(maxParallelLoadingCount, texturePromiseParams, jsonToTextureParams);
     }
 
-    public async preloadRemainingTextures(entity: MVEntity, forceSequentialExecution: boolean): Promise<any> {
+    public async preloadRemainingTextures(
+        entity: MVEntity,
+        forceSequentialExecution: boolean
+    ): Promise<any> {
         const createLightmapTexturePromises: Promise<any>[] = [];
 
         if (entity.lightmapArrayJSON) {
             for (const lightmapUrl of entity.lightmapArrayJSON) {
-                const createLightmapTexturePromise = this.createLightmapTexture({
-                    entity: entity,
-                    lightmapFileName: lightmapUrl,
-                }).then((texture) => {
+                const createLightmapTexturePromise = this.createLightmapTexture(
+                    {
+                        entity: entity,
+                        lightmapFileName: lightmapUrl
+                    }
+                ).then((texture) => {
                     // this._scene.removeTexture(texture);
                 });
-                if (forceSequentialExecution) await createLightmapTexturePromise;
-                createLightmapTexturePromises.push(createLightmapTexturePromise);
+                if (forceSequentialExecution)
+                    await createLightmapTexturePromise;
+                createLightmapTexturePromises.push(
+                    createLightmapTexturePromise
+                );
             }
         }
 
         const allMaterialUrls = Object.keys(entity.mv_materials);
-        const textureJsons = Object.values(this.materialUrlsToTextureJsonMapping(entity, allMaterialUrls));
+        const textureJsons = Object.values(
+            this.materialUrlsToTextureJsonMapping(entity, allMaterialUrls)
+        );
 
         const loadTexturePromises: Promise<any>[] = [];
 
@@ -641,7 +816,7 @@ export class EntityService {
             const loadTexturePromise = jsonToTextureParams({
                 json: textureJson,
                 scene: this._scene,
-                baseUrl: entity.texturesBaseUrl,
+                baseUrl: entity.texturesBaseUrl
             }).then((texture) => {
                 // this._scene.removeTexture(texture);
             });
@@ -649,15 +824,28 @@ export class EntityService {
             loadTexturePromises.push(loadTexturePromise);
         }
 
-        await Promise.all([...createLightmapTexturePromises, ...loadTexturePromises]);
+        await Promise.all([
+            ...createLightmapTexturePromises,
+            ...loadTexturePromises
+        ]);
     }
 
-    private getlightmapFileName(entity: MVEntity, layerName, glbFileName: string) {
-        let lightmapFileName = entity.lightmapArrayJSON?.find((fileName: string) => {
-            return fileName.startsWith(layerName + '.');
-        });
-        if (entity.entityConfig.lightmapOverwrites && entity.entityConfig.lightmapOverwrites[glbFileName]) {
-            lightmapFileName = entity.entityConfig.lightmapOverwrites[glbFileName];
+    private getlightmapFileName(
+        entity: MVEntity,
+        layerName,
+        glbFileName: string
+    ) {
+        let lightmapFileName = entity.lightmapArrayJSON?.find(
+            (fileName: string) => {
+                return fileName.startsWith(layerName + '.');
+            }
+        );
+        if (
+            entity.entityConfig.lightmapOverwrites &&
+            entity.entityConfig.lightmapOverwrites[glbFileName]
+        ) {
+            lightmapFileName =
+                entity.entityConfig.lightmapOverwrites[glbFileName];
         }
         return lightmapFileName;
     }
@@ -669,13 +857,23 @@ export class EntityService {
      * @param layer -
      *
      */
-    private async loadMeshes(entity: MVEntity, layerPath: string, layer: MVLayer): Promise<AbstractMesh[]> {
+    private async loadMeshes(
+        entity: MVEntity,
+        layerPath: string,
+        layer: MVLayer
+    ): Promise<AbstractMesh[]> {
         let meshes: AbstractMesh[];
 
         try {
-            meshes = await this._assetLoader.loadMeshes(entity.meshesBaseUrl, layerPath, layer);
+            meshes = await this._assetLoader.loadMeshes(
+                entity.meshesBaseUrl,
+                layerPath,
+                layer
+            );
         } catch (error) {
-            MVLogger.error(`Failed loading file ${entity.meshesBaseUrl}${layerPath}`);
+            MVLogger.error(
+                `Failed loading file ${entity.meshesBaseUrl}${layerPath}`
+            );
         }
         return meshes;
     }
@@ -684,7 +882,7 @@ export class EntityService {
         entity: MVEntity,
         layerPath: string,
         layer: MVLayer,
-        meshes: AbstractMesh[],
+        meshes: AbstractMesh[]
     ): Promise<AbstractMesh[]> {
         // Setup mesh hierarchy
         if (!meshes && meshes.length <= 0) {
@@ -701,7 +899,9 @@ export class EntityService {
                 const isSocket = layerPath.includes('_socket_');
                 let socket;
                 if (isSocket) {
-                    const socketName = layerPath.split('_socket_')[1].replace('.glb', '');
+                    const socketName = layerPath
+                        .split('_socket_')[1]
+                        .replace('.glb', '');
                     socket = getChildNodeById(entity.rootNode, socketName);
                 }
                 if (!isSocket || !socket) {
@@ -710,7 +910,12 @@ export class EntityService {
                     mesh.setParent(socket);
                 }
 
-                const meshAndInstances = await this.applyMeshSettingsFromJson(entity, mesh, layer, layerPath);
+                const meshAndInstances = await this.applyMeshSettingsFromJson(
+                    entity,
+                    mesh,
+                    layer,
+                    layerPath
+                );
                 for (let m of meshAndInstances) {
                     // not sure why this is not working but it could save performance if we get it to work in the future
                     // https://doc.babylonjs.com/divingDeeper/scene/optimize_your_scene
@@ -720,6 +925,9 @@ export class EntityService {
                     this.setInspectableCustomProperties(m, layerPath, layer);
                     this.processOriginalMaterial(entity, m, layer);
                     layer.addMesh(m);
+                    if (m.material) {
+                        this._scene.addMaterial(m.material);
+                    }
                     this._scene.addMesh(m);
                 }
             }
@@ -727,7 +935,11 @@ export class EntityService {
         return meshes;
     }
 
-    public setInspectableCustomProperties(mesh: AbstractMesh, layerPath: string, layer: MVLayer) {
+    public setInspectableCustomProperties(
+        mesh: AbstractMesh,
+        layerPath: string,
+        layer: MVLayer
+    ) {
         if (mesh.inspectableCustomProperties?.length > 0) {
             return;
         }
@@ -740,14 +952,14 @@ export class EntityService {
         mesh.inspectableCustomProperties.push({
             label: 'File Name',
             propertyName: 'fileName',
-            type: InspectableType.String,
+            type: InspectableType.String
         });
 
         if (mesh['originalFileName']) {
             mesh.inspectableCustomProperties.push({
                 label: 'Original File Name',
                 propertyName: 'originalFileName',
-                type: InspectableType.String,
+                type: InspectableType.String
             });
         }
 
@@ -755,7 +967,7 @@ export class EntityService {
             mesh.inspectableCustomProperties.push({
                 label: 'Original Mesh Id',
                 propertyName: 'originalMeshId',
-                type: InspectableType.String,
+                type: InspectableType.String
             });
         }
 
@@ -763,13 +975,13 @@ export class EntityService {
         mesh.inspectableCustomProperties.push({
             label: 'Layer Name',
             propertyName: 'layerName',
-            type: InspectableType.String,
+            type: InspectableType.String
         });
 
         mesh.inspectableCustomProperties.push({
             label: 'is clone',
             propertyName: 'isClone',
-            type: InspectableType.String,
+            type: InspectableType.String
         });
 
         const lightmapFileName = mesh['lightmapFileName'];
@@ -778,25 +990,29 @@ export class EntityService {
             mesh.inspectableCustomProperties.push({
                 label: 'Lightmap',
                 propertyName: 'lightmapFileName',
-                type: InspectableType.String,
+                type: InspectableType.String
             });
         }
 
-        mesh['hideOnCameraIntersect'] = mesh['hideOnCameraIntersect'] ? mesh['hideOnCameraIntersect'] : false;
+        mesh['hideOnCameraIntersect'] = mesh['hideOnCameraIntersect']
+            ? mesh['hideOnCameraIntersect']
+            : false;
         mesh.inspectableCustomProperties.push({
             label: 'Hide On Camera Intersect',
             propertyName: 'hideOnCameraIntersect',
-            type: InspectableType.Checkbox,
+            type: InspectableType.Checkbox
         });
 
-        mesh['boundingBoxScale'] = mesh['boundingBoxScale'] ? mesh['boundingBoxScale'] : 1.0;
+        mesh['boundingBoxScale'] = mesh['boundingBoxScale']
+            ? mesh['boundingBoxScale']
+            : 1.0;
         mesh.inspectableCustomProperties.push({
             label: 'Bounding Box Scale',
             propertyName: 'boundingBoxScale',
             type: InspectableType.Slider,
             min: 0.0,
             max: 10.0,
-            step: 0.1,
+            step: 0.1
         });
     }
 
@@ -818,10 +1034,16 @@ export class EntityService {
     public async addProduct(
         entityConfig: MVEntityConfig,
         id: string,
-        onLoadingProgressUpdate$: Subject<number>,
+        onLoadingProgressUpdate$: Subject<number>
     ): Promise<MVEntity> {
-        const entity = new MVProductEntity(entityConfig, id, onLoadingProgressUpdate$);
-        const cleanupPromises = this._entities.filter((p) => p instanceof MVProductEntity).map((p) => this.dispose(p));
+        const entity = new MVProductEntity(
+            entityConfig,
+            id,
+            onLoadingProgressUpdate$
+        );
+        const cleanupPromises = this._entities
+            .filter((p) => p instanceof MVProductEntity)
+            .map((p) => this.dispose(p));
 
         await Promise.all(cleanupPromises);
 
@@ -847,15 +1069,22 @@ export class EntityService {
         entityConfig: MVEntityConfig,
         id: string,
         onLoadingProgressUpdate$: Subject<number>,
-        preloadOnly: boolean,
+        preloadOnly: boolean
     ): Promise<MVEnvironmentEntity> {
-        const entity = new MVEnvironmentEntity(entityConfig, id, onLoadingProgressUpdate$);
+        const entity = new MVEnvironmentEntity(
+            entityConfig,
+            id,
+            onLoadingProgressUpdate$
+        );
 
         if (!preloadOnly) {
             const cleanupPromises = this._entities
                 .filter((p) => p instanceof MVEnvironmentEntity)
                 .map(async (environmentEntity) => {
-                    return Promise.all([this.dispose(environmentEntity), this.removeLightsOfEntity(environmentEntity)]);
+                    return Promise.all([
+                        this.dispose(environmentEntity),
+                        this.removeLightsOfEntity(environmentEntity)
+                    ]);
                 });
 
             await Promise.all(cleanupPromises);
@@ -867,7 +1096,10 @@ export class EntityService {
 
     public getEnvironmentEntityById(entityId): MVEnvironmentEntity {
         return this._entities.find((entity) => {
-            return entity.mv_id == entityId && entity instanceof MVEnvironmentEntity;
+            return (
+                entity.mv_id == entityId &&
+                entity instanceof MVEnvironmentEntity
+            );
         }) as MVEnvironmentEntity;
     }
 
@@ -877,11 +1109,13 @@ export class EntityService {
         if (!entityToDispose.rootNode) return undefined;
         if (entityToDispose.rootNode.isDisposed()) return undefined;
 
-        const disposeRootNodePromise = new Promise((resolve: any, reject: any) => {
-            entityToDispose.rootNode.onDisposeObservable.addOnce(() => {
-                resolve(entityToDispose);
-            });
-        });
+        const disposeRootNodePromise = new Promise(
+            (resolve: any, reject: any) => {
+                entityToDispose.rootNode.onDisposeObservable.addOnce(() => {
+                    resolve(entityToDispose);
+                });
+            }
+        );
 
         if (!this._coreSettings.enableLazyLoading) {
             entityToDispose.rootNode.dispose(false, false);
@@ -902,7 +1136,12 @@ export class EntityService {
         }
 
         for (const layer of entity.layers) {
-            await disposeLayer(layer, this._scene, entity, this._coreSettings.enableLazyLoading);
+            await disposeLayer(
+                layer,
+                this._scene,
+                entity,
+                this._coreSettings.enableLazyLoading
+            );
         }
 
         if (!this._coreSettings.enableLazyLoading) {
@@ -967,9 +1206,11 @@ export class EntityService {
         const animations = entity.getAnimations();
         let clonedAnimations: MVAnimation[] = [];
         if (animations) {
-            clonedAnimations = entity.getAnimations()?.map((animation: MVAnimation) => {
-                return animation.clone(animation.id);
-            });
+            clonedAnimations = entity
+                .getAnimations()
+                ?.map((animation: MVAnimation) => {
+                    return animation.clone(animation.id);
+                });
         }
         return clonedAnimations;
     }
@@ -983,19 +1224,25 @@ export class EntityService {
         await Promise.all(resetAnimationPromises);
     }
 
-    public async setAnimationsToPreviousState(entity: MVEntity, previousAnimations: MVAnimation[]): Promise<void> {
+    public async setAnimationsToPreviousState(
+        entity: MVEntity,
+        previousAnimations: MVAnimation[]
+    ): Promise<void> {
         const animations = entity.getAnimations();
         const setAnimationPromises: Promise<MVAnimation>[] = [];
         animations.forEach((animation: MVAnimation) => {
-            const previousAnimation: MVAnimation = previousAnimations?.find((anim: MVAnimation) => {
-                return anim.id == animation.id;
-            });
+            const previousAnimation: MVAnimation = previousAnimations?.find(
+                (anim: MVAnimation) => {
+                    return anim.id == animation.id;
+                }
+            );
             if (previousAnimation) {
                 const playAnimationOptions: PlayAnimationOptions = {
                     to: previousAnimation.getCurrentFrame(),
-                    speedRatio: 1000,
+                    speedRatio: 1000
                 };
-                const setAnimationPromise = animation.play(playAnimationOptions);
+                const setAnimationPromise =
+                    animation.play(playAnimationOptions);
                 setAnimationPromises.push(setAnimationPromise);
             }
         });
@@ -1006,7 +1253,9 @@ export class EntityService {
         const animations = entity.getAnimations();
         const animationFinishedPromises = [];
         animations.forEach((animation: MVAnimation) => {
-            animationFinishedPromises.push(animation.waitUntilFinishedPlaying());
+            animationFinishedPromises.push(
+                animation.waitUntilFinishedPlaying()
+            );
         });
         await Promise.all(animationFinishedPromises);
     }
@@ -1020,7 +1269,7 @@ export class EntityService {
         cameraCategory: string,
         entity?: MVEntity,
         preventSceneFreezing?: boolean,
-        _waitForSceneReady?: boolean,
+        _waitForSceneReady?: boolean
     ): Promise<void> {
         const entities = entity ? [entity] : this._entities;
 
@@ -1037,14 +1286,21 @@ export class EntityService {
 
         if (entitiesToUpdate.length == 0) return;
 
-        if (this._coreSettings.productionMode && !this._environmentUpdateInProgress && !this._productUpdateInProgress) {
+        if (
+            this._coreSettings.productionMode &&
+            !this._environmentUpdateInProgress &&
+            !this._productUpdateInProgress
+        ) {
             this._scene.unfreezeActiveMeshes();
             this.unfreezeMaterials();
         }
 
         for (let ent of entitiesToUpdate) {
             await this.updateLights(cameraCategory, ent);
-            await this._sceneSettingsService.updateSceneSettings(cameraCategory, ent as MVEnvironmentEntity);
+            await this._sceneSettingsService.updateSceneSettings(
+                cameraCategory,
+                ent as MVEnvironmentEntity
+            );
         }
 
         // Waiting for scene ready takes a long time and is only required after the light setup changes.
@@ -1089,7 +1345,10 @@ export class EntityService {
      * @param cameraCategory -
      * @param entity - If no entity is provided, changes will be applied to all active entities
      */
-    public async updateLights(cameraCategory: string, entity?: MVEntity): Promise<void> {
+    public async updateLights(
+        cameraCategory: string,
+        entity?: MVEntity
+    ): Promise<void> {
         const entities = entity ? [entity] : this._entities;
 
         for (const _entity of entities) {
@@ -1116,7 +1375,7 @@ export class EntityService {
         entity: MVEntity,
         mesh: AbstractMesh,
         layer: MVLayer,
-        glbFileName: string,
+        glbFileName: string
     ): Promise<AbstractMesh[]> {
         const meshAndInstances = [mesh];
         mesh['isClone'] = 'false';
@@ -1126,12 +1385,20 @@ export class EntityService {
         let meshSetting: MVMeshSetting;
         if (entity.mv_productionMeshSettings) {
             meshSetting = entity.mv_productionMeshSettings[mesh.id];
-            lightmapFileName = meshSetting ? meshSetting['lightmapFileName'] : null;
+            lightmapFileName = meshSetting
+                ? meshSetting['lightmapFileName']
+                : null;
         } else if (entity.mv_meshSettings) {
-            meshSetting = entity.mv_meshSettings.meshes.find((meshSetting: MVMeshSetting) => {
-                return meshSetting.id == mesh.id;
-            });
-            lightmapFileName = this.getlightmapFileName(entity, layer.name, glbFileName);
+            meshSetting = entity.mv_meshSettings.meshes.find(
+                (meshSetting: MVMeshSetting) => {
+                    return meshSetting.id == mesh.id;
+                }
+            );
+            lightmapFileName = this.getlightmapFileName(
+                entity,
+                layer.name,
+                glbFileName
+            );
         }
 
         if (lightmapFileName) {
@@ -1148,7 +1415,9 @@ export class EntityService {
             //   }
             // }
 
-            let mirrorNode = parentNode.getChildren()?.find((c) => c.id == 'mirror') as TransformNode;
+            let mirrorNode = parentNode
+                .getChildren()
+                ?.find((c) => c.id == 'mirror') as TransformNode;
             if (!mirrorNode) {
                 mirrorNode = new TransformNode('mirror', this._scene);
                 mirrorNode.setParent(parentNode);
@@ -1162,7 +1431,10 @@ export class EntityService {
 
         if (meshSetting) {
             if (meshSetting.socketName) {
-                const socket = getChildNodeById(entity.rootNode, meshSetting.socketName);
+                const socket = getChildNodeById(
+                    entity.rootNode,
+                    meshSetting.socketName
+                );
                 if (socket) {
                     mesh['parentSocket'] = socket;
                     mesh.setParent(socket);
@@ -1181,7 +1453,9 @@ export class EntityService {
                     } else if (property == 'originalMeshId') {
                         m[property] = value;
                     } else if (property == 'boundingBoxScale') {
-                        m.getBoundingInfo().boundingBox.scale(meshSetting[property]);
+                        m.getBoundingInfo().boundingBox.scale(
+                            meshSetting[property]
+                        );
                         m[property] = value;
                     } else if (property == 'hideOnCameraIntersect') {
                         m['hideOnCameraIntersect'] = value;
@@ -1199,15 +1473,25 @@ export class EntityService {
      * @param mesh -
      * @param layer -
      */
-    private processOriginalMaterial(entity: MVEntity, mesh: AbstractMesh, layer: MVLayer): void {
+    private processOriginalMaterial(
+        entity: MVEntity,
+        mesh: AbstractMesh,
+        layer: MVLayer
+    ): void {
         if (mesh.material || mesh['materialName']) {
             mesh.useVertexColors = false;
 
-            if (entity.entityConfig.useVCAOForPBRMaterials && mesh['getVertexBuffer']) {
+            if (
+                entity.entityConfig.useVCAOForPBRMaterials &&
+                mesh['getVertexBuffer']
+            ) {
                 mesh.useVertexColors = true;
-                const colorVertexBuffer = (mesh as Mesh).getVertexBuffer(VertexBuffer.ColorKind);
+                const colorVertexBuffer = (mesh as Mesh).getVertexBuffer(
+                    VertexBuffer.ColorKind
+                );
                 if (colorVertexBuffer) {
-                    const vertexColorArray = colorVertexBuffer._buffer._data as number[];
+                    const vertexColorArray = colorVertexBuffer._buffer
+                        ._data as number[];
 
                     const VCAOMultiplyFactor =
                         entity.entityConfig.VCAOMultiplyFactor !== undefined
@@ -1216,9 +1500,17 @@ export class EntityService {
                     const VCAOPower = 1;
 
                     if (vertexColorArray) {
-                        for (let i = 0; i < vertexColorArray.length; i = i + 4) {
-                            const multiplied = vertexColorArray[i] * VCAOMultiplyFactor;
-                            vertexColorArray[i] = Math.min(Math.pow(multiplied, VCAOPower), 1);
+                        for (
+                            let i = 0;
+                            i < vertexColorArray.length;
+                            i = i + 4
+                        ) {
+                            const multiplied =
+                                vertexColorArray[i] * VCAOMultiplyFactor;
+                            vertexColorArray[i] = Math.min(
+                                Math.pow(multiplied, VCAOPower),
+                                1
+                            );
                             const redValue = vertexColorArray[i];
                             vertexColorArray[i + 1] = redValue;
                             vertexColorArray[i + 2] = redValue;
@@ -1238,7 +1530,7 @@ export class EntityService {
             } else {
                 originalMaterialName = mesh.material.name.substring(
                     0,
-                    lastDotIndex > 0 ? lastDotIndex : mesh.material.name.length,
+                    lastDotIndex > 0 ? lastDotIndex : mesh.material.name.length
                 );
             }
 
@@ -1251,13 +1543,17 @@ export class EntityService {
                 mesh.inspectableCustomProperties.push({
                     label: 'Original Material Name',
                     propertyName: 'originalMaterialName',
-                    type: InspectableType.String,
+                    type: InspectableType.String
                 });
             }
 
-            let materialMapping: MVMaterialMapping = entity.getMaterialMapping(originalMaterialName);
+            let materialMapping: MVMaterialMapping =
+                entity.getMaterialMapping(originalMaterialName);
             if (!materialMapping) {
-                materialMapping = new MVMaterialMapping(originalMaterialName, null);
+                materialMapping = new MVMaterialMapping(
+                    originalMaterialName,
+                    null
+                );
                 entity.addMaterialMapping(materialMapping);
             }
             materialMapping.addMesh(mesh);
@@ -1269,9 +1565,13 @@ export class EntityService {
      * @param entity -
      * @param materialMappingUrl -
      */
-    private async getTargetMaterial(entity: MVEntity, materialMappingUrl: string): Promise<Material> {
+    private async getTargetMaterial(
+        entity: MVEntity,
+        materialMappingUrl: string
+    ): Promise<Material> {
         const targetMaterialUrl = materialMappingUrl;
-        let targetMaterial = this._materialService.getMaterial(targetMaterialUrl);
+        let targetMaterial =
+            this._materialService.getMaterial(targetMaterialUrl);
 
         if (!targetMaterial) {
             targetMaterial = await this._materialService.mv_createMaterial(
@@ -1279,7 +1579,7 @@ export class EntityService {
                 entity.materialsBaseUrl,
                 entity.texturesBaseUrl,
                 targetMaterialUrl,
-                entity.entityConfig.environmentBRDFTextureUrl,
+                entity.entityConfig.environmentBRDFTextureUrl
             );
             // this._scene['mv_materials'][targetMaterial.id] = targetMaterial;
         }
@@ -1300,15 +1600,18 @@ export class EntityService {
             [key: string]: AbstractMesh[];
         } = {};
 
-        entity.materialMappings.forEach((materialMapping: MVMaterialMapping, key: string) => {
-            const materialUrl = materialMapping.mapping;
-            if (!materialUrl) return;
-            let meshesOfMaterialUrl: AbstractMesh[] = meshesMappedByMaterialUrls[materialUrl];
-            meshesOfMaterialUrl = meshesOfMaterialUrl
-                ? [...meshesOfMaterialUrl, ...materialMapping.meshes]
-                : materialMapping.meshes;
-            meshesMappedByMaterialUrls[materialUrl] = meshesOfMaterialUrl;
-        });
+        entity.materialMappings.forEach(
+            (materialMapping: MVMaterialMapping, key: string) => {
+                const materialUrl = materialMapping.mapping;
+                if (!materialUrl) return;
+                let meshesOfMaterialUrl: AbstractMesh[] =
+                    meshesMappedByMaterialUrls[materialUrl];
+                meshesOfMaterialUrl = meshesOfMaterialUrl
+                    ? [...meshesOfMaterialUrl, ...materialMapping.meshes]
+                    : materialMapping.meshes;
+                meshesMappedByMaterialUrls[materialUrl] = meshesOfMaterialUrl;
+            }
+        );
 
         for (let materialUrl of Object.keys(meshesMappedByMaterialUrls)) {
             // meshesMappedByMaterialUrls.forEach((meshes: AbstractMesh[], materialUrl: string) => {
@@ -1328,8 +1631,15 @@ export class EntityService {
      * @param materialUrl -
      * @param meshes -
      */
-    private async applyMaterial(entity: MVEntity, materialUrl: string, meshes: AbstractMesh[]): Promise<Material[]> {
-        const targetMaterial: Material = await this.getTargetMaterial(entity, materialUrl);
+    private async applyMaterial(
+        entity: MVEntity,
+        materialUrl: string,
+        meshes: AbstractMesh[]
+    ): Promise<Material[]> {
+        const targetMaterial: Material = await this.getTargetMaterial(
+            entity,
+            materialUrl
+        );
         const isNodeMaterial = targetMaterial instanceof NodeMaterial;
         if (!targetMaterial) return [];
 
@@ -1341,7 +1651,11 @@ export class EntityService {
             let materialPromise: Promise<Material>;
             if (hasLightMap) {
                 const targetMVMaterial = targetMaterial as MVMaterial;
-                materialPromise = this.getLightMapMaterial(entity, mesh, targetMVMaterial);
+                materialPromise = this.getLightMapMaterial(
+                    entity,
+                    mesh,
+                    targetMVMaterial
+                );
             } else {
                 materialPromise = Promise.resolve(targetMaterial);
             }
@@ -1350,32 +1664,40 @@ export class EntityService {
             //   this._sceneOptimizerService.addMeshToGlowLayer(mesh);
             // }
 
-            const applyMaterialPromise = materialPromise.then(async (material) => {
-                let isTransparent = false;
-                if (
-                    material instanceof MVMaterial &&
-                    isTransparentMaterial(material.transparencyMode, material.alpha, material.opacityTexture)
-                ) {
-                    isTransparent = true;
-                }
-                const useVertexColors =
-                    isNodeMaterial || (entity.entityConfig.useVCAOForPBRMaterials && !isTransparent);
-                mesh.useVertexColors = useVertexColors;
-                mesh['vertexColorInUse'] = useVertexColors;
-
-                if (!mesh.isAnInstance) {
+            const applyMaterialPromise = materialPromise.then(
+                async (material) => {
+                    let isTransparent = false;
+                    if (
+                        material instanceof MVMaterial &&
+                        isTransparentMaterial(
+                            material.transparencyMode,
+                            material.alpha,
+                            material.opacityTexture
+                        )
+                    ) {
+                        isTransparent = true;
+                    }
+                    const useVertexColors =
+                        isNodeMaterial ||
+                        (entity.entityConfig.useVCAOForPBRMaterials &&
+                            !isTransparent);
                     mesh.useVertexColors = useVertexColors;
-                    mesh.material = material;
-                }
+                    mesh['vertexColorInUse'] = useVertexColors;
 
-                if (mesh['clones']) {
-                    mesh['clones'].forEach((clone) => {
-                        clone.useVertexColors = useVertexColors;
-                        clone.material = material;
-                    });
+                    if (!mesh.isAnInstance) {
+                        mesh.useVertexColors = useVertexColors;
+                        mesh.material = material;
+                    }
+
+                    if (mesh['clones']) {
+                        mesh['clones'].forEach((clone) => {
+                            clone.useVertexColors = useVertexColors;
+                            clone.material = material;
+                        });
+                    }
+                    return material;
                 }
-                return material;
-            });
+            );
 
             await applyMaterialPromise;
             promises.push(applyMaterialPromise);
@@ -1390,19 +1712,32 @@ export class EntityService {
      * @param mesh -
      * @param material -
      */
-    private async getLightMapMaterial(entity: MVEntity, mesh: AbstractMesh, material: MVMaterial): Promise<MVMaterial> {
+    private async getLightMapMaterial(
+        entity: MVEntity,
+        mesh: AbstractMesh,
+        material: MVMaterial
+    ): Promise<MVMaterial> {
         const isUnlitMaterial = material.unlit;
 
         if (
-            isTransparentMaterial(material.transparencyMode, material.alpha, material.opacityTexture) ||
+            isTransparentMaterial(
+                material.transparencyMode,
+                material.alpha,
+                material.opacityTexture
+            ) ||
             isUnlitMaterial
         )
             return material;
 
         const lightmapFileName = mesh['lightmapFileName'];
-        const newMaterialName = material.name.replace(FileType.JSON, `_LIGHTMAP_${lightmapFileName}${FileType.JSON}`);
+        const newMaterialName = material.name.replace(
+            FileType.JSON,
+            `_LIGHTMAP_${lightmapFileName}${FileType.JSON}`
+        );
 
-        let newMaterial = this._materialService.getMaterial(newMaterialName) as MVMaterial;
+        let newMaterial = this._materialService.getMaterial(
+            newMaterialName
+        ) as MVMaterial;
         if (newMaterial) return newMaterial;
 
         try {
@@ -1412,10 +1747,12 @@ export class EntityService {
                 entity,
                 newMaterial,
                 lightmapFileName,
-                mesh['layerName'],
+                mesh['layerName']
             );
         } catch (error) {
-            MVLogger.error(`Failed to create lightmap material ${newMaterialName}`);
+            MVLogger.error(
+                `Failed to create lightmap material ${newMaterialName}`
+            );
             console.error(error);
             return material;
         }
@@ -1436,11 +1773,14 @@ export class EntityService {
         }
 
         const lightmapTextureUrl =
-            entity.entityConfig.entityConfigBaseUrl + entity.lightmapTexturesUrlRelative + lightmapFileName;
+            entity.entityConfig.entityConfigBaseUrl +
+            entity.lightmapTexturesUrlRelative +
+            lightmapFileName;
         // const allTextures: Texture[] = Object.values(this._scene['mv_textures']);
         const lightmapTextureKey = getTextureKeyFromUrl(
             lightmapTextureUrl,
-            entity.entityConfig.postProcessingConfiguration?.lightmapTextureLevel,
+            entity.entityConfig.postProcessingConfiguration
+                ?.lightmapTextureLevel
         );
         // let texture: BaseTexture = allTextures.find((texture: BaseTexture) => {
         //   const textureKey: string = texture['mv_textureKey'];
@@ -1453,25 +1793,34 @@ export class EntityService {
         //   if (!textureKey) return false;
         //   return lightmapTextureKey == textureKey;
         // });
-        let lightMapTexture: BaseTexture = this._scene['mv_cached_textures'][lightmapTextureKey];
+        let lightMapTexture: BaseTexture =
+            this._scene['mv_cached_textures'][lightmapTextureKey];
 
         if (lightMapTexture) {
             return lightMapTexture;
         }
 
         // console.log("Creating texture " + entity.lightmapTexturesUrlRelative + lightmapFileName);
-        lightMapTexture = await this._textureService.createTexture(entity, lightmapTextureUrl);
+        lightMapTexture = await this._textureService.createTexture(
+            entity,
+            lightmapTextureUrl
+        );
 
         if (!lightMapTexture) return null;
 
         // this._scene['mv_textures'][(lightMapTexture as Texture).uniqueId] = lightMapTexture;
         // lightMapTexture = new Texture(lightmapTextureUrl, this._scene);
         lightMapTexture['isLightmapTexture'] = true;
-        lightMapTexture.name = entity.lightmapTexturesUrlRelative + lightmapFileName;
+        lightMapTexture.name =
+            entity.lightmapTexturesUrlRelative + lightmapFileName;
         lightMapTexture['vScale'] = -1;
         lightMapTexture.coordinatesIndex = 1;
-        if (entity.entityConfig.postProcessingConfiguration?.lightmapTextureLevel) {
-            lightMapTexture.level = entity.entityConfig.postProcessingConfiguration?.lightmapTextureLevel;
+        if (
+            entity.entityConfig.postProcessingConfiguration
+                ?.lightmapTextureLevel
+        ) {
+            lightMapTexture.level =
+                entity.entityConfig.postProcessingConfiguration?.lightmapTextureLevel;
         }
 
         if (params.removeFromScene) {
@@ -1492,13 +1841,13 @@ export class EntityService {
         entity: MVEntity,
         lightMapMaterial: MVMaterial,
         lightmapFileName: string,
-        layerName: string,
+        layerName: string
     ): Promise<MVMaterial> {
         // lightMapMaterial.id = lightMapMaterial.name;
 
         const lightMapTexture = await this.createLightmapTexture({
             entity: entity,
-            lightmapFileName: lightmapFileName,
+            lightmapFileName: lightmapFileName
         });
 
         lightMapMaterial['isLightmapMaterial'] = true;
@@ -1519,26 +1868,34 @@ export class EntityService {
         updatedMaterialMappingsJson: MVMaterialMappingsJson,
         originalMaterialName: string,
         relativeTargetMaterialUrl: string,
-        slotName?: string,
+        slotName?: string
     ) {
         entity.mv_materialMappings = updatedMaterialMappingsJson;
 
-        const fullRelativeTargetMaterialUrl = entity.entityConfig.materialsUrlRelative + relativeTargetMaterialUrl;
-        let targetMaterialJson = entity.mv_materials[fullRelativeTargetMaterialUrl];
+        const fullRelativeTargetMaterialUrl =
+            entity.entityConfig.materialsUrlRelative +
+            relativeTargetMaterialUrl;
+        let targetMaterialJson =
+            entity.mv_materials[fullRelativeTargetMaterialUrl];
 
         if (!targetMaterialJson) {
             const baseUrl = entity.entityConfig.entityConfigBaseUrl;
-            const targetMaterialUrl = baseUrl + entity.entityConfig.materialsUrlRelative + relativeTargetMaterialUrl;
+            const targetMaterialUrl =
+                baseUrl +
+                entity.entityConfig.materialsUrlRelative +
+                relativeTargetMaterialUrl;
             targetMaterialJson = await loadJson(targetMaterialUrl);
-            entity.mv_materials[fullRelativeTargetMaterialUrl] = targetMaterialJson;
+            entity.mv_materials[fullRelativeTargetMaterialUrl] =
+                targetMaterialJson;
         }
 
         const targetMaterial: Material = await this.getTargetMaterial(
             entity,
-            entity.entityConfig.materialsUrlRelative + relativeTargetMaterialUrl,
+            entity.entityConfig.materialsUrlRelative + relativeTargetMaterialUrl
         );
 
-        const materialMapping: MVMaterialMapping = entity.materialMappings.get(originalMaterialName);
+        const materialMapping: MVMaterialMapping =
+            entity.materialMappings.get(originalMaterialName);
 
         if (!slotName) {
             materialMapping.mapping = relativeTargetMaterialUrl;
@@ -1548,7 +1905,10 @@ export class EntityService {
                 }
             });
         } else {
-            entity = await this._configurationService.updateConfiguration(entity, entity.activeConfigurationCodes);
+            entity = await this._configurationService.updateConfiguration(
+                entity,
+                entity.activeConfigurationCodes
+            );
             await this.applyMaterials(entity);
         }
     }
@@ -1584,15 +1944,18 @@ export class EntityService {
     public async disposeUnusedMaterialsAndTextures(timeoutInMS: number) {
         await timeout(timeoutInMS);
         const colorGradingTexture: BaseTexture =
-            this._sceneSettingsService.getRenderPipeline().imageProcessing?.colorGradingTexture;
-        const backdropTexture = this._sceneSettingsService.getBackdropImageLayer()?.texture;
-        const environmentTextures = this.activeEnvironmentEntity.environmentTextures;
+            this._sceneSettingsService.getRenderPipeline().imageProcessing
+                ?.colorGradingTexture;
+        const backdropTexture =
+            this._sceneSettingsService.getBackdropImageLayer()?.texture;
+        const environmentTextures =
+            this.activeEnvironmentEntity.environmentTextures;
         return disposeUnusedMaterialsAndTextures(
             this._scene,
             colorGradingTexture,
             backdropTexture as Texture,
             environmentTextures,
-            this._coreSettings.enableLazyLoading,
+            this._coreSettings.enableLazyLoading
         );
     }
 
@@ -1600,13 +1963,19 @@ export class EntityService {
         entity.loadingStatus.totalAssetsToLoad = 0;
         entity.loadingStatus.loadedAssetsCount = 0;
         entity.loadingStatus.loadingProgressPercentage = 0;
-        entity.onLoadingProgressUpdate$.next(entity.loadingStatus.loadingProgressPercentage);
+        entity.onLoadingProgressUpdate$.next(
+            entity.loadingStatus.loadingProgressPercentage
+        );
     }
 
     public incrementLoadedAssetCount(entity: MVEntity) {
         entity.loadingStatus.loadedAssetsCount++;
         entity.loadingStatus.loadingProgressPercentage =
-            (entity.loadingStatus.loadedAssetsCount / entity.loadingStatus.totalAssetsToLoad) * 100;
-        entity.onLoadingProgressUpdate$.next(entity.loadingStatus.loadingProgressPercentage);
+            (entity.loadingStatus.loadedAssetsCount /
+                entity.loadingStatus.totalAssetsToLoad) *
+            100;
+        entity.onLoadingProgressUpdate$.next(
+            entity.loadingStatus.loadingProgressPercentage
+        );
     }
 }

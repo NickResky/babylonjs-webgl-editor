@@ -1,0 +1,10 @@
+<div>
+  <h2 mat-dialog-title [innerHtml]="title"></h2>
+  <mat-dialog-content class="mat-typography">
+    <div [innerHtml]="description"></div>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+      <button mat-stroked-button (click)="submit()">Okay</button>
+      <button mat-stroked-button (click)="cancel()">Cancel</button>
+  </mat-dialog-actions>
+</div>

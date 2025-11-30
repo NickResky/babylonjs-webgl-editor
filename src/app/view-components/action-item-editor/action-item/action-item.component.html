@@ -1,0 +1,87 @@
+<mat-form-field class="action-item__select">
+    <mat-label>{{ actionItem.id }}</mat-label>
+    <mat-select
+        [value]="currentValue"
+        (selectionChange)="
+            onSelect({ newStateID: $event.value, actionItemID: actionItem.id })
+        "
+    >
+        <mat-option
+            *ngFor="let state of actionItem.getStates()"
+            [value]="state.id"
+        >
+            {{ state.id }}
+        </mat-option>
+    </mat-select>
+</mat-form-field>
+
+<!-- <mat-form-field class="action-item__input-field"> -->
+<mat-label>New State/Item ID</mat-label>
+<input
+    type="text"
+    matInput
+    #newState
+    placeholder="Type new Action Item ID or State ID"
+    [(ngModel)]="inputValue"
+    (keyup)="onInputEnter()"
+/>
+<!-- </mat-form-field> -->
+
+<div class="action-item__button-wrapper">
+    <button
+        mat-stroked-button
+        matTooltip="Rename Action Item ID to: {{ inputValue }}"
+        matTooltipPosition="above"
+        aria-label="Rename Action Item ID button"
+        (click)="onRenameActionItem({ value: inputValue, id: actionItem.id })"
+        [disabled]="isEmpty"
+    >
+        Rename Item
+    </button>
+    <button
+        mat-stroked-button
+        matTooltip="Rename Action Item's State ID to {{ inputValue }}"
+        matTooltipPosition="above"
+        aria-label="Rename Action Item's State ID button"
+        (click)="
+            onRenameState({
+                newStateID: inputValue,
+                currentStateID: actionItem.getState().id,
+                actionItemID: actionItem.id
+            })
+        "
+        [disabled]="isEmpty"
+    >
+        Rename State
+    </button>
+</div>
+<div class="action-item__button-wrapper">
+    <button
+        mat-stroked-button
+        matTooltip="Delete Action Item: {{ actionItem.id }}"
+        matTooltipPosition="below"
+        aria-label="Delete Action Item button"
+        color="warn"
+        (click)="onDeleteActionItem(actionItem.id)"
+    >
+        Delete Item
+    </button>
+    <button
+        mat-stroked-button
+        matTooltip="Add new state to Action Item with ID: {{ inputValue }}"
+        matTooltipPosition="below"
+        aria-label="Add new state to Action Item"
+        color="primary"
+        (click)="
+            onAddNewState({
+                actionItemID: actionItem.id,
+                newStateName: inputValue
+            })
+        "
+        [disabled]="isEmpty"
+    >
+        New State
+    </button>
+</div>
+
+<mat-divider></mat-divider>

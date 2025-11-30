@@ -1,57 +1,164 @@
-<!-- <div class="material-editor__sheet-wrapper">
-  <button type="button" (click)="onSyncWithCWSClicked()" mat-stroked-button matTooltip="Sync Switch Materials with CWS"
-    matTooltipPosition="above" aria-label="Edit Switch Material button" *ngIf="isCwsEntity">
-    Sync with CWS
-  </button>
-  <mat-form-field class="material-editor__sheet-filter">
-    <mat-label>Filter</mat-label>
-    <input matInput type="text" [(ngModel)]="filterValue" (keyup)="applyFilter()"
-      placeholder="type swtich material name">
-  </mat-form-field>
-  <cdk-virtual-scroll-viewport tvsItemSize="5" style="height: 275px;">
-    <table class="material-editor__sheet mat-elevation-z8" mat-table [dataSource]="dataSource">
+<div class="material-editor__sheet-wrapper">
+    <button
+        type="button"
+        (click)="onSyncWithCWSClicked()"
+        mat-stroked-button
+        matTooltip="Sync Switch Materials with CWS"
+        matTooltipPosition="above"
+        aria-label="Edit Switch Material button"
+        *ngIf="isCwsEntity"
+    >
+        Sync with CWS
+    </button>
+    <mat-form-field class="material-editor__sheet-filter">
+        <mat-label>Filter</mat-label>
+        <input
+            matInput
+            type="text"
+            [(ngModel)]="filterValue"
+            (keyup)="applyFilter()"
+            placeholder="type swtich material name"
+        />
+    </mat-form-field>
 
-      <ng-container matColumnDef="switchMaterialName">
-        <th mat-header-cell *matHeaderCellDef class="material-editor__sheet__header">Name</th>
-        <td class="material-editor__sheet__cell" mat-cell *matCellDef="let slot" matTooltip="{{slot.switchMaterialName}}"
-          matTooltipPosition="right">
-          {{slot.switchMaterialName}}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="slotName">
-        <th mat-header-cell *matHeaderCellDef class="material-editor__sheet__header">Slot</th>
-        <td class="material-editor__sheet__cell" mat-cell *matCellDef="let slot" matTooltip="{{slot.slotName}}"
-          matTooltipPosition="right">
-          {{slot.slotName}}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="mapping">
-        <th mat-header-cell *matHeaderCellDef class="material-editor__sheet__header"> Mapping </th>
-        <td class="material-editor__sheet__cell" mat-cell *matCellDef="let slot" matTooltip="{{slot.mapping}}"
-          matTooltipPosition="right">
-          {{slot.mapping}}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef class="material-editor__sheet__header"></th>
-        <td class="material-editor__sheet__cell material-editor__sheet__cell--action" mat-cell *matCellDef="let slot">
-          <div class="material-editor__sheet__button-wrapper">
-            <button type="button"
-              (click)="onEditSwitchClicked({ switchMaterialName: slot.switchMaterialName, slot: { name: slot.slotName, mapping: slot.mapping}})"
-              mat-stroked-button matTooltip="Edit Switch Material" matTooltipPosition="above"
-              aria-label="Edit Switch Material button">
-              Edit
+    <div *ngFor="let slot of switchMaterialSlots" class="flex flex-row">
+        <div class="w-[150px] pr-[10px] overflow-hidden text-ellipsis">
+            {{ slot.switchMaterialName }}
+        </div>
+        <div class="w-[150px] pr-[10px] overflow-hidden text-ellipsis">
+            {{ slot.slotName }}
+        </div>
+        <div class="w-[200px] pr-[10px] overflow-hidden text-ellipsis">
+            {{ slot.mapping }}
+        </div>
+        <div class="material-editor__sheet__button-wrapper">
+            <button
+                type="button"
+                (click)="
+                    onEditSwitchClicked({
+                        switchMaterialName: slot.switchMaterialName,
+                        slot: {
+                            name: slot.slotName,
+                            mapping: slot.mapping
+                        }
+                    })
+                "
+                mat-stroked-button
+                matTooltip="Edit Switch Material"
+                matTooltipPosition="above"
+                aria-label="Edit Switch Material button"
+            >
+                Edit
             </button>
-          </div>
-        </td>
-      </ng-container>
+        </div>
+    </div>
 
-      <tr mat-header-row *matHeaderRowDef="switchMaterialColumns"></tr>
-      <tr mat-row *matRowDef="let myRowData; columns: switchMaterialColumns"></tr>
-    </table>
-  </cdk-virtual-scroll-viewport>
+    <cdk-virtual-scroll-viewport
+        tvsItemSize="5"
+        style="height: 275px"
+        *ngIf="false"
+    >
+        <table
+            class="material-editor__sheet mat-elevation-z8"
+            mat-table
+            [dataSource]="dataSource"
+        >
+            <ng-container matColumnDef="switchMaterialName">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="material-editor__sheet__header"
+                >
+                    Name
+                </th>
+                <td
+                    class="material-editor__sheet__cell"
+                    mat-cell
+                    *matCellDef="let slot"
+                    matTooltip="{{ slot.switchMaterialName }}"
+                    matTooltipPosition="right"
+                >
+                    {{ slot.switchMaterialName }}
+                </td>
+            </ng-container>
 
-</div> -->
+            <ng-container matColumnDef="slotName">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="material-editor__sheet__header"
+                >
+                    Slot
+                </th>
+                <td
+                    class="material-editor__sheet__cell"
+                    mat-cell
+                    *matCellDef="let slot"
+                    matTooltip="{{ slot.slotName }}"
+                    matTooltipPosition="right"
+                >
+                    {{ slot.slotName }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="mapping">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="material-editor__sheet__header"
+                >
+                    Mapping
+                </th>
+                <td
+                    class="material-editor__sheet__cell"
+                    mat-cell
+                    *matCellDef="let slot"
+                    matTooltip="{{ slot.mapping }}"
+                    matTooltipPosition="right"
+                >
+                    {{ slot.mapping }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="action">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="material-editor__sheet__header"
+                ></th>
+                <td
+                    class="material-editor__sheet__cell material-editor__sheet__cell--action"
+                    mat-cell
+                    *matCellDef="let slot"
+                >
+                    <div class="material-editor__sheet__button-wrapper">
+                        <button
+                            type="button"
+                            (click)="
+                                onEditSwitchClicked({
+                                    switchMaterialName: slot.switchMaterialName,
+                                    slot: {
+                                        name: slot.slotName,
+                                        mapping: slot.mapping
+                                    }
+                                })
+                            "
+                            mat-stroked-button
+                            matTooltip="Edit Switch Material"
+                            matTooltipPosition="above"
+                            aria-label="Edit Switch Material button"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="switchMaterialColumns"></tr>
+            <tr
+                mat-row
+                *matRowDef="let myRowData; columns: switchMaterialColumns"
+            ></tr>
+        </table>
+    </cdk-virtual-scroll-viewport>
+</div>

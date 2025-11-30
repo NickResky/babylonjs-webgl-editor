@@ -1,16 +1,23 @@
-<div [formGroup]="data.allocatorForm" class="material-editor__material-types__allocator__allocatorForm">
-  <h4>Add new Allocator</h4>
+<div
+    [formGroup]="data.allocatorForm"
+    class="material-editor__material-types__allocator__allocatorForm"
+>
+    <h4>Add new Allocator</h4>
 
-  <mat-form-field class="material-editor__material-types__allocator__select">
-    <mat-label>Choose material name</mat-label>
-    <mat-select formControlName="name">
-      <mat-option *ngFor="let material of data.availableMaterials" [value]="material">
-        {{ material }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+    <mat-form-field class="material-editor__material-types__allocator__select">
+        <mat-label>Choose material name</mat-label>
+        <mat-select formControlName="name">
+            <mat-option
+                *ngFor="let material of data?.availableMaterials || []"
+                [value]="material"
+                class="!bg-white"
+            >
+                {{ material }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
 
-  <!-- <mat-form-field class="material-editor__material-types__allocator__select">
+    <!-- <mat-form-field class="material-editor__material-types__allocator__select">
     <mat-label>Choose mapping material</mat-label>
     <mat-select formControlName="mapping">
       <mat-option *ngFor="let mapping of availableMaterialMappings" [value]="mapping">
@@ -19,40 +26,46 @@
     </mat-select>
   </mat-form-field> -->
 
-  <app-material-url-picker
-    (urlChange)="updateMaterialMappingUrl($event)">
-  </app-material-url-picker>
-  
-  <mat-dialog-actions class="material-editor__material-types__allocator__button-wrapper">
-    <button 
-      class="material-editor__material-types__allocator__header__button" 
-      mat-stroked-button  
-      type="button" 
-      (click)="onSaveButtonClick()"
-      matTooltip="Save Allocator"
-      matTooltipPosition="above"
-      aria-label="Save Allocator button"
-      [disabled]="!relativeMaterialMappingUrl || !data.allocatorForm.value.name">
-        Save
-    </button>
+    <app-material-url-picker (urlChange)="updateMaterialMappingUrl($event)">
+    </app-material-url-picker>
+
+    <mat-dialog-actions
+        class="material-editor__material-types__allocator__button-wrapper"
+    >
+        <button
+            class="material-editor__material-types__allocator__header__button"
+            mat-stroked-button
+            type="button"
+            (click)="onSaveButtonClick()"
+            matTooltip="Save Allocator"
+            matTooltipPosition="above"
+            aria-label="Save Allocator button"
+            [disabled]="
+                !relativeMaterialMappingUrl || !data.allocatorForm.value.name
+            "
+        >
+            Save
+        </button>
+        <button
+            type="button"
+            mat-dialog-close
+            class="material-editor__material-types__allocator__header__button"
+            mat-stroked-button
+            matTooltip="Cancel Changes"
+            matTooltipPosition="above"
+            aria-label="Cancel Changes button"
+        >
+            Cancel
+        </button>
+    </mat-dialog-actions>
     <button
-      type="button"
-      mat-dialog-close
-      class="material-editor__material-types__allocator__header__button" 
-      mat-stroked-button
-      matTooltip="Cancel Changes"
-      matTooltipPosition="above"
-      aria-label="Cancel Changes button">
-      Cancel
+        type="button"
+        class="material-editor__close-button"
+        mat-dialog-close
+        matTooltip="Close dialoge"
+        matTooltipPosition="below"
+        aria-label="Close dialoge button"
+    >
+        X
     </button>
-  </mat-dialog-actions>
-  <button
-    type="button"
-    class="material-editor__close-button"
-    mat-dialog-close
-    matTooltip="Close dialoge"
-    matTooltipPosition="below"
-    aria-label="Close dialoge button">
-      X
-  </button>
 </div>

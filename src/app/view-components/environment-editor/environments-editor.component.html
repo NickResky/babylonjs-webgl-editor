@@ -1,0 +1,35 @@
+<h4>Available environments</h4>
+<mat-form-field>
+    <mat-label>Environment</mat-label>
+    <mat-select
+        [value]="selectedEnvironmentUrl"
+        (selectionChange)="changeEnvironment($event.value)"
+    >
+        <mat-option
+            *ngFor="let environmentUrl of environmentUrls"
+            [value]="environmentUrl"
+        >
+            {{ environmentUrl }}
+        </mat-option>
+    </mat-select>
+</mat-form-field>
+
+<mat-form-field
+    *ngIf="environmentConfigCodes && environmentConfigCodes.length > 0"
+>
+    <mat-label>Environment Config</mat-label>
+    <mat-select
+        [value]="selectedEnvironmentConfigCode"
+        (selectionChange)="changeEnvironmentConfig($event.value)"
+        [disabled]="true"
+    >
+        <mat-option
+            *ngFor="let environmentConfigCode of environmentConfigCodes"
+            [value]="environmentConfigCode"
+            class="!bg-white hover:cursor-pointer"
+            [style.backgroundColor]="'white !important'"
+        >
+            {{ environmentConfigCode }}
+        </mat-option>
+    </mat-select>
+</mat-form-field>

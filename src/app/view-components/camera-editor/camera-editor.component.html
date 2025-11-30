@@ -1,0 +1,99 @@
+<div class="camera-editor">
+  <div class="camera-row camera-filter-row">
+    <div class="camera-filter-icon">
+      <mat-icon>filter_list</mat-icon>
+    </div>
+    <input class="camera-filter-search" [(ngModel)]="filterSearch" type="text" placeholder="Search" name="" id="">
+    <div class="camera-filter-category">
+      <!-- <button (click)="filterByCategory('int')" mat-stroked-button color="accent" [ngClass]="{'is--active': filterCategory === 'int'}">
+        INT
+      </button>
+      <button (click)="filterByCategory('ext')" mat-stroked-button color="accent" [ngClass]="{'is--active': filterCategory === 'ext'}">
+        EXT
+      </button> -->
+    </div>
+    <button (click)="clearFilter()" mat-stroked-button color="accent" class="editButton" [disabled]="filterSearch === '' && !filterCategory">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+  <button
+    mat-stroked-button
+    (click)="toggleDetails()"
+    [ngClass]="expandDetails ? 'focus' : ''"
+    class="camera-button"
+  >
+    Expand All Details
+  </button>
+  <div class="camera-row">
+    <button
+      mat-stroked-button
+      (click)="requestFreeCamera()"
+      [ngClass]="isFreeCamera ? 'focus' : ''"
+      class="camera-button"
+    >
+      Free Camera
+    </button>
+  </div>
+  <div *ngFor="let cameraShot of cameraShots | cameraFilter: filterSearch:filterCategory">
+    <div class="camera-row" [ngClass]="[(cameraShot.activeInEditor || expandDetails || hasMissingCameras(cameraShot)) ? 'camera-row-expanded' : '', hasMissingCameras(cameraShot) ? 'error' : '']">
+      <button
+        mat-stroked-button
+        (click)="requestCameraShot(cameraShot.id)"
+        [ngClass]="cameraShot.activeInEditor && !isFreeCamera ? 'focus' : ''"
+        class="camera-button"
+      >
+        <span [innerHtml]="cameraShot.label ? cameraShot.label : cameraShot.id"></span>
+        <span class="camera-url camera-url-desktop" *ngIf="cameraShot.activeInEditor || expandDetails || hasMissingCameras(cameraShot)" [innerHtml]="'Desktop URL: ' + cameraShot.urlRelative" [ngClass]="cameraShot.activeInEditor && !cameraShot.mobileActiveInEditor ? 'active' : ''"></span>
+        <span class="camera-url" *ngIf="cameraShot.activeInEditor || expandDetails || hasMissingCameras(cameraShot)" [innerHtml]="'Mobile URL: ' + cameraShot.mobileUrlRelative" [ngClass]="cameraShot.mobileActiveInEditor ? 'active' : ''"></span>
+      </button>
+      <button
+        aria-label="Toggle Mobile"
+        mat-stroked-button class="editButton"
+        [disabled]="!cameraShot.cameraShotSettingsMobile"
+        [ngClass]="cameraShot.mobileActiveInEditor && !isFreeCamera ? 'active' : ''"
+        (click)="toggleMobileCameraShot(cameraShot)"
+        class="toggle-mobile-button" 
+        >
+        <mat-icon>smartphone</mat-icon>
+      </button>
+      <button [matMenuTriggerFor]="menu" aria-label="Options" mat-stroked-button class="editButton">
+        ...
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="saveCameraShot(cameraShot)" *ngIf="(cameraShot.urlRelative || cameraShot.mobileUrlRelative) && cameraShot.activeInEditor">
+          <span>Save Camera JSON</span>
+        </button>
+        <button mat-menu-item (click)="deleteCameraShot(cameraShot.id)">
+          <span>Delete Camera Shot</span>
+        </button>
+        <button mat-menu-item (click)="openChangeCameraShotNameDialog(cameraShot.id)">
+          <span>Rename Camera Shot</span>
+        </button>
+        <button mat-menu-item (click)="changeCameraShotJSON(cameraShot.id, false)">
+          <span>Change camera JSON</span>
+        </button>
+        <button mat-menu-item (click)="changeCameraShotJSON(cameraShot.id, true)">
+          <span>Change mobile camera JSON</span>
+        </button>
+        <button mat-menu-item (click)="renameCameraShotJSON(cameraShot, false)">
+          <span>Rename camera JSON</span>
+        </button>
+        <button mat-menu-item (click)="renameCameraShotJSON(cameraShot, true)">
+          <span>Rename mobile camera JSON</span>
+        </button>
+        <!-- <button mat-menu-item (click)="onAddCameraAnimationClicked(cameraShot.id)"> -->
+        <button mat-menu-item>
+          <span>TODO Add animation (GLB)</span>
+        </button>
+      </mat-menu>
+    </div> 
+    <!-- TODO-->
+    <!-- <div *ngIf="cameraShot.settings.animationFile">
+      {{ cameraShot.settings.animationFile }}
+      <button (click)="deleteAnimation(cameraShot.id)">Delete animation</button>
+    </div> -->
+  </div>
+  <button (click)="addNewCameraShotJSON()" class="newCameraButton" mat-stroked-button>Add new camera JSON</button>
+  <button (click)="addNewCameraShot()" class="newCameraButton" mat-stroked-button>Add new camera shot</button>
+
+</div>

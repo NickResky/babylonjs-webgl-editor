@@ -1,0 +1,11 @@
+.action-item__header{
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+.action-item__wrapper {
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  margin-top: 20px;
+}

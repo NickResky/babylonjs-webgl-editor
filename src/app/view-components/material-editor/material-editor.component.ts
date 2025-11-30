@@ -3,6 +3,7 @@ import { combineLatest } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,82 +17,88 @@ import { MaterialUrlPickerComponent } from './material-url-picker/material-url-p
 import { SwitchTableComponent } from './switch-table/switch-table.component';
 
 @Component({
-  selector: 'app-material-editor',
-  templateUrl: './material-editor.component.html',
-  styleUrls: ['./material-editor.component.scss'],
-  imports: [
-    MaterialUrlPickerComponent,
-    FormsModule,
-    MatSelectModule,
-    SwitchTableComponent,
-    MatExpansionModule,
-    AllocatorTableComponent,
-    MatFormFieldModule,
-    CommonModule,
-  ],
+    selector: 'app-material-editor',
+    templateUrl: './material-editor.component.html',
+    styleUrls: ['./material-editor.component.scss'],
+    imports: [
+        MaterialUrlPickerComponent,
+        FormsModule,
+        MatSelectModule,
+        SwitchTableComponent,
+        MatExpansionModule,
+        AllocatorTableComponent,
+        MatFormFieldModule,
+        CommonModule,
+        MatButtonModule
+    ]
 })
 export class MaterialEditorComponent implements OnInit {
-  private projectSettings: ProjectSettings;
-  public entities: MVEntity[] = [];
-  public activeEntity: MVEntity;
-  private core: Core;
-  public materialsLoaded = false;
+    private projectSettings: ProjectSettings;
+    public entities: MVEntity[] = [];
+    public activeEntity: MVEntity;
+    private core: Core;
+    public materialsLoaded = false;
 
-  public loading = true;
-  private _switchMaterialColumns: string[] = ['name', 'mapping', 'action'];
+    public loading = true;
+    private _switchMaterialColumns: string[] = ['name', 'mapping', 'action'];
 
-  public newMaterialName: string;
+    public newMaterialName: string;
 
-  constructor(
-    private dataService: DataService,
-    private materialService: MaterialService,
-    public modal: MatDialog,
-    private entityService: EntityService
-  ) {
-    this.materialService.materialMappingsJSON$.subscribe((mappings) => {
-      this.loading = false;
-    });
-  }
-
-  async ngOnInit() {
-    combineLatest([
-      this.dataService.projectSettings$,
-      this.dataService.core$,
-      this.dataService.entities$,
-      this.dataService.activeEntity$,
-    ]).subscribe(async (data: [ProjectSettings, Core, MVEntity[], MVEntity]) => {
-      this.projectSettings = data[0];
-      this.core = data[1];
-      this.entities = data[2];
-      this.activeEntity = data[3];
-      this.loading = false;
-    });
-  }
-
-  loadMaterials() {
-    this.materialsLoaded = true;
-  }
-
-  unloadMaterials() {
-    this.materialsLoaded = false;
-  }
-
-  async onChangeEntityClicked(entity: MVEntity): Promise<void> {
-    this.activeEntity = entity;
-    if (this.activeEntity) {
-      await this.materialService.setupActiveEntity(this.activeEntity);
+    constructor(
+        private dataService: DataService,
+        private materialService: MaterialService,
+        public modal: MatDialog,
+        private entityService: EntityService
+    ) {
+        this.materialService.materialMappingsJSON$.subscribe((mappings) => {
+            this.loading = false;
+        });
     }
-  }
 
-  public onNewAllocatorClicked(): void {
-    this.materialService.openNewAllocatorDialog();
-  }
+    async ngOnInit() {
+        combineLatest([
+            this.dataService.projectSettings$,
+            this.dataService.core$,
+            this.dataService.entities$,
+            this.dataService.activeEntity$
+        ]).subscribe(
+            async (data: [ProjectSettings, Core, MVEntity[], MVEntity]) => {
+                this.projectSettings = data[0];
+                this.core = data[1];
+                this.entities = data[2];
+                this.activeEntity = data[3];
+                this.loading = false;
+            }
+        );
+    }
 
-  public onDeleteAllocatorClicked(allocator: MVMaterialMappingJson): void {
-    this.materialService.deleteAllocator(allocator);
-  }
+    loadMaterials() {
+        this.materialsLoaded = true;
+    }
 
-  public onNewMaterialClicked(isNodeMaterial: boolean): void {
-    this.materialService.addNewMaterial(this.newMaterialName, isNodeMaterial);
-  }
+    unloadMaterials() {
+        this.materialsLoaded = false;
+    }
+
+    async onChangeEntityClicked(entity: MVEntity): Promise<void> {
+        this.activeEntity = entity;
+        if (this.activeEntity) {
+            await this.materialService.setupActiveEntity(this.activeEntity);
+        }
+    }
+
+    public onNewAllocatorClicked(): void {
+        this.materialService.openNewAllocatorDialog();
+    }
+
+    public onDeleteAllocatorClicked(allocator: MVMaterialMappingJson): void {
+        this.materialService.deleteAllocator(allocator);
+    }
+
+    public onNewMaterialClicked(isNodeMaterial: boolean): void {
+        this.materialService.addNewMaterial(
+            this.newMaterialName,
+            isNodeMaterial
+        );
+    }
 }

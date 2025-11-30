@@ -1,0 +1,17 @@
+<mat-card class="environment-bg-card">
+  <mat-card-content>
+    <div *ngIf="environmentBackgroundImageUrl.length; else elseBlock" class="environment-bg-card__bg-img-container">
+      <img mat-card-image src="{{ environmentBackgroundImageUrl }}" alt="Environment background image">
+      <div>{{relativeEnvironmentBackgroundImageUrl}}</div>
+    </div>
+    <ng-template #elseBlock>
+      <div class="environment-bg-card__bg-img-container">No environment background image selected.</div>
+    </ng-template>
+  </mat-card-content>
+  <mat-card-actions>
+    <div class="environment-bg-card__action-btn-wrapper">
+      <button mat-raised-button (click)="onChangeBackgroundClick()">Change Background</button>
+      <button mat-raised-button color="warn" (click)="onRemoveBackgroundClick()" [disabled]="environmentBackgroundImageUrl === ''">Remove Background</button>
+    </div>
+  </mat-card-actions>
+</mat-card>

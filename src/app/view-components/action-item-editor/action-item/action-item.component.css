@@ -1,0 +1,10 @@
+.action-item__button-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px;
+}
+
+.action-item__input-field,
+.action-item__select {
+  width: 100%;
+}

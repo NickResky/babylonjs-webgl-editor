@@ -1,64 +1,69 @@
 {
-  "name": "webgl-editor",
-  "version": "0.0.0",
-  "main": "main.js",
-  "scripts": {
-    "ng": "ng",
-    "start": "concurrently \"ng serve --port 4205\" \"wait-on http://localhost:4205 && electron . --serve\" ",
-    "electron": "ng serve && electron .",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
-  },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
-    ]
-  },
-  "private": true,
-  "dependencies": {
-    "@angular/common": "^20.3.0",
-    "@angular/compiler": "^20.3.0",
-    "@angular/core": "^20.3.0",
-    "@angular/forms": "^20.3.0",
-    "@angular/material": "^20.2.9",
-    "@angular/platform-browser": "^20.3.0",
-    "@angular/router": "^20.3.0",
-    "@tailwindcss/postcss": "^4.1.14",
-    "babylonjs": "^8.32.0",
-    "babylonjs-loaders": "^8.32.0",
-    "babylonjs-materials": "^8.32.0",
-    "bowser": "^2.12.1",
-    "concurrently": "^9.2.1",
-    "inversify": "^7.10.3",
-    "ng-table-virtual-scroll": "^1.6.1",
-    "npm-run-all": "^4.1.5",
-    "postcss": "^8.5.6",
-    "rxjs": "~7.8.0",
-    "tailwindcss": "^4.1.14",
-    "tslib": "^2.3.0",
-    "wait-on": "^9.0.1",
-    "zone.js": "~0.15.0"
-  },
-  "devDependencies": {
-    "@angular/build": "^20.3.6",
-    "@angular/cli": "^20.3.6",
-    "@angular/compiler-cli": "^20.3.0",
-    "@types/jasmine": "~5.1.0",
-    "electron": "^38.3.0",
-    "jasmine-core": "~5.9.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
-  }
+    "name": "webgl-editor",
+    "version": "0.0.0",
+    "main": "main.js",
+    "scripts": {
+        "ng": "ng",
+        "dev": "concurrently \"ng serve --port 4205\" \"wait-on http://localhost:4205 && electron . --serve\" ",
+        "electron": "ng serve && electron .",
+        "build": "ng build",
+        "watch": "ng build --watch --configuration development",
+        "test": "ng test"
+    },
+    "prettier": {
+        "printWidth": 100,
+        "singleQuote": true,
+        "overrides": [
+            {
+                "files": "*.html",
+                "options": {
+                    "parser": "angular"
+                }
+            }
+        ]
+    },
+    "private": true,
+    "dependencies": {
+        "@angular/cdk": "^20.2.9",
+        "@angular/common": "^20.3.0",
+        "@angular/compiler": "^20.3.0",
+        "@angular/core": "^20.3.0",
+        "@angular/forms": "^20.3.0",
+        "@angular/material": "^20.2.9",
+        "@angular/platform-browser": "^20.3.0",
+        "@angular/router": "^20.3.0",
+        "@tailwindcss/postcss": "^4.1.14",
+        "babylonjs": "^8.32.0",
+        "babylonjs-inspector": "^8.32.2",
+        "babylonjs-loaders": "^8.32.0",
+        "babylonjs-materials": "^8.32.0",
+        "babylonjs-node-editor": "^8.32.2",
+        "bowser": "^2.12.1",
+        "concurrently": "^9.2.1",
+        "inversify": "^7.10.3",
+        "ng-table-virtual-scroll": "^1.6.1",
+        "npm-run-all": "^4.1.5",
+        "postcss": "^8.5.6",
+        "rxjs": "~7.8.0",
+        "tailwindcss": "^4.1.14",
+        "tslib": "^2.3.0",
+        "wait-on": "^9.0.1",
+        "zone.js": "~0.15.0"
+    },
+    "devDependencies": {
+        "@angular/build": "^20.3.6",
+        "@angular/cli": "^20.3.6",
+        "@angular/compiler-cli": "^20.3.0",
+        "@types/jasmine": "~5.1.0",
+        "electron": "^38.3.0",
+        "eslint-config-prettier": "^10.1.8",
+        "jasmine-core": "~5.9.0",
+        "karma": "~6.4.0",
+        "karma-chrome-launcher": "~3.2.0",
+        "karma-coverage": "~2.2.0",
+        "karma-jasmine": "~5.1.0",
+        "karma-jasmine-html-reporter": "~2.1.0",
+        "prettier": "^3.6.2",
+        "typescript": "~5.9.2"
+    }
 }

@@ -1,26 +1,39 @@
 <div class="content-app">
-  <div class="content-app__main-box" autosize>
-    <!-- <mat-drawer #drawer class="content-app__main-box__sidenav" mode="side">
+    <div class="content-app__main-box" autosize>
+        <!-- <mat-drawer #drawer class="content-app__main-box__sidenav" mode="side">
       <app-file-explorer [class]="{'hidden': fullScreen || !isFileExplorerOpen}" class="content-app__main-box__sidenav__explorer"></app-file-explorer>
     </mat-drawer> -->
-  
-    <div class="content-app__main-box__content">
-        <div class="" style="flex: 1; position: relative" [class]="{'content-main-fullscreen': fullScreen, 'content-app__main-box__content__main': !fullScreen}">
-            <router-outlet />
+
+        <div class="content-app__main-box__content">
+            <div
+                class=""
+                style="flex: 1; position: relative"
+                [class]="{
+                    'content-main-fullscreen': fullScreen,
+                    'content-app__main-box__content__main': !fullScreen
+                }"
+            >
+                <router-outlet />
+            </div>
+            <app-sidebar
+                [class]="{ hidden: fullScreen }"
+                class="bg-grey content-app__main-box__content__sidebar"
+                [style]="{ width: sidebarWidth }"
+                [class]="{ hidden: fullScreen }"
+                mwlResizable
+            >
+                <button
+                    mat-stroked-button
+                    matTooltip="Hotkey: J"
+                    matTooltipPosition="below"
+                    type="button"
+                    (click)="resizeSidebar()"
+                    class="content-app__button"
+                >
+                    Resize Sidebar
+                </button>
+            </app-sidebar>
         </div>
-      <app-sidebar [class]="{'hidden': fullScreen}" class="bg-grey content-app__main-box__content__sidebar" [style]="{'width': sidebarWidth}" [class]="{'hidden': fullScreen}" mwlResizable>
-        <button
-          mat-stroked-button
-          matTooltip="Hotkey: J"
-          matTooltipPosition="below"
-          type="button"
-          (click)="resizeSidebar()"
-          class="content-app__button">
-          Resize Sidebar
-        </button>
-      </app-sidebar>
     </div>
-  
-</div>
 </div>
 <!-- <notifier-container></notifier-container> -->

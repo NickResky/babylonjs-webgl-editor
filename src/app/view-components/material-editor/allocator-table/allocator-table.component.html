@@ -1,64 +1,146 @@
 <div class="material-editor__sheet-wrapper">
-  <mat-form-field class="material-editor__sheet-filter">
-    <mat-label>Filter</mat-label>
-    <input matInput (keyup)="applyFilter($event)" placeholder="type allocator name or mapping">
-  </mat-form-field>
-  <cdk-virtual-scroll-viewport tvsItemSize="5" style="height: 450px;">
-    <table class="material-editor__sheet mat-elevation-z8" mat-table matSort matSortActive="name" matSortDirection="asc" [dataSource]="dataSource">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef class="material-editor__sheet__header" mat-sort-header> Name </th>
-        <td
-          class="material-editor__sheet__cell"
-          mat-cell 
-          *matCellDef="let allocator"
-          matTooltip="{{allocator.name}}"
-          matTooltipPosition="right">
-            {{allocator.name}}
-          </td>
-      </ng-container>
-  
-      <ng-container matColumnDef="mapping">
-        <th mat-header-cell *matHeaderCellDef class="material-editor__sheet__header" mat-sort-header> Mapping </th>
-        <td 
-          class="material-editor__sheet__cell"
-          mat-cell
-          *matCellDef="let allocator"
-          matTooltip="{{allocator.mapping}}"
-          matTooltipPosition="left">
-            {{allocator.mapping}}
-          </td>
-      </ng-container>
-  
-      <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef class="material-editor__sheet__header"></th>
-        <td class="material-editor__sheet__cell material-editor__sheet__cell--action" mat-cell *matCellDef="let allocator">
-          <div class="material-editor__sheet__button-wrapper">
+    <mat-form-field class="material-editor__sheet-filter">
+        <mat-label>Filter</mat-label>
+        <input matInput placeholder="type allocator name or mapping" />
+    </mat-form-field>
+
+    <div *ngFor="let allocator of data" class="flex flex-row">
+        <div class="w-[200px] pr-[10px] overflow-hidden text-ellipsis">
+            {{ allocator.name }}
+        </div>
+        <div class="w-[200px] pr-[10px] overflow-hidden text-ellipsis">
+            {{ allocator.mapping }}
+        </div>
+        <div class="material-editor__sheet__button-wrapper">
             <button
-              type="button"
-              (click)="onEditClick(allocator)"
-              mat-stroked-button
-              matTooltip="Edit Allocator material"
-              matTooltipPosition="above"
-              aria-label="Edit Allocator material">
-              Edit
+                mat-stroked-button
+                type="button"
+                (click)="onEditClick(allocator)"
+                mat-stroked-button
+                matTooltip="Edit Allocator material"
+                matTooltipPosition="above"
+                aria-label="Edit Allocator material"
+            >
+                Edit
             </button>
             <button
-              type="button"
-              (click)="onDeleteClick(allocator)"
-              mat-stroked-button
-              color="warn"
-              matTooltip="Delete Allocator material"
-              matTooltipPosition="above"
-              aria-label="Delete Allocator material">
-              Delete
+                mat-stroked-button
+                type="button"
+                (click)="onDeleteClick(allocator)"
+                mat-stroked-button
+                color="warn"
+                matTooltip="Delete Allocator material"
+                matTooltipPosition="above"
+                aria-label="Delete Allocator material"
+            >
+                Delete
             </button>
-          </div>
-        </td>
-      </ng-container>
-  
-      <tr mat-header-row *matHeaderRowDef="allocatorColumns"></tr>
-      <tr mat-row *matRowDef="let myRowData; columns: allocatorColumns"></tr>
-    </table>
-  </cdk-virtual-scroll-viewport>
-  
+        </div>
+    </div>
+
+    <cdk-virtual-scroll-viewport
+        tvsItemSize="5"
+        style="height: 450px"
+        *ngIf="false && data.length"
+    >
+        <table
+            class="material-editor__sheet mat-elevation-z8"
+            mat-table
+            matSort
+            matSortActive="name"
+            matSortDirection="asc"
+            [dataSource]="dataSource"
+        >
+            <tr mat-header-row *matHeaderRowDef="allocatorColumns"></tr>
+            <tr
+                mat-row
+                *matRowDef="let myRowData; columns: allocatorColumns"
+            ></tr>
+            <ng-container matColumnDef="name">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="material-editor__sheet__header"
+                    mat-sort-header
+                >
+                    Name
+                </th>
+                <!-- <td
+                    class="material-editor__sheet__cell"
+                    mat-cell
+                    *ngFor="let allocator of data"
+                    matTooltip="{{ allocator.name }}"
+                    matTooltipPosition="right"
+                >
+                    {{ allocator.name }}
+                </td> -->
+                <td
+                    class="material-editor__sheet__cell"
+                    mat-cell
+                    *matCellDef="let allocator"
+                    matTooltip="{{ allocator.name }}"
+                    matTooltipPosition="right"
+                >
+                    {{ allocator.name }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="mapping">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="material-editor__sheet__header"
+                    mat-sort-header
+                >
+                    Mapping
+                </th>
+                <td
+                    class="material-editor__sheet__cell"
+                    mat-cell
+                    *matCellDef="let allocator"
+                    matTooltip="{{ allocator.mapping }}"
+                    matTooltipPosition="left"
+                >
+                    {{ allocator.mapping }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="action">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="material-editor__sheet__header"
+                ></th>
+                <td
+                    class="material-editor__sheet__cell material-editor__sheet__cell--action"
+                    mat-cell
+                    *matCellDef="let allocator"
+                >
+                    <div class="material-editor__sheet__button-wrapper">
+                        <button
+                            type="button"
+                            (click)="onEditClick(allocator)"
+                            mat-stroked-button
+                            matTooltip="Edit Allocator material"
+                            matTooltipPosition="above"
+                            aria-label="Edit Allocator material"
+                        >
+                            Edit
+                        </button>
+                        <button
+                            type="button"
+                            (click)="onDeleteClick(allocator)"
+                            mat-stroked-button
+                            color="warn"
+                            matTooltip="Delete Allocator material"
+                            matTooltipPosition="above"
+                            aria-label="Delete Allocator material"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+        </table>
+    </cdk-virtual-scroll-viewport>
 </div>

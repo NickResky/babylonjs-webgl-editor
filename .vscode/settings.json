@@ -1,0 +1,29 @@
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+    },
+    "prettier.configPath": ".prettierrc.js",
+    "prettier.prettierPath": "./node_modules/prettier",
+    "editor.detectIndentation": false,
+    "tailwindCSS.includeLanguages": {
+        "typescript": "html"
+    },
+    "editor.quickSuggestions": {
+        "strings": true
+    },
+    "tailwindCSS.experimental.configFile": "tailwind.config.js",
+    "tailwindCSS.emmetCompletions": true,
+    "tailwindCSS.validate": true,
+    "editor.quickSuggestions": {
+        "strings": true
+    },
+    "tailwindCSS.includeLanguages": {
+        "html": "html",
+        "typescript": "html" // only needed if you use inline templates
+    }
+}

@@ -1,0 +1,24 @@
+<div *ngIf="actionItems">
+  <div class="action-item__header">
+    <h4>Available Action Items</h4>
+    <button 
+      mat-stroked-button
+      color="primary"
+      matTooltip="Add new Action Item to the Scene"
+      matTooltipPosition="above"
+      aria-label="Add new Action Item to the Scene button"
+      (click)="onNewActionItem()">
+        New Item
+    </button>
+  </div>
+  <mat-divider></mat-divider>
+  <div class="action-item__wrapper" *ngFor="let actionItem of actionItems">
+    <action-item 
+      [actionItem]="actionItem"
+      (onStateChange)="changeActionItemConfig($event)"
+      (renameActionItem)="changeActionItemName($event)"
+      (renameActionCurrentState)="changeCurrentStateName($event)"
+      (deleteActionItem)="deleteActionItem($event)"
+      (addNewState)="addNewState($event)"></action-item>
+  </div>
+</div>

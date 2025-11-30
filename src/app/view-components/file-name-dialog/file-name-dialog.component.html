@@ -1,0 +1,17 @@
+<form [formGroup]="form">
+    <h1 mat-dialog-title>{{ description }}</h1>
+    <mat-dialog-content>
+      <mat-form-field>
+        <input matInput formControlName="filename" placeholder="{{ placeholder }}" [(ngModel)]="fileName">
+      </mat-form-field>
+    </mat-dialog-content>
+    <div *ngIf="isRenameMaterialDialog">
+      <span>Rename references in the following entity files:</span>
+      <div *ngFor="let url of selectedEntityUrls">{{url}}</div>
+      <button mat-button (click)="onAddEntityClicked()">Add entity</button>
+    </div>
+    <mat-dialog-actions>
+      <button mat-button (click)="rename()">Save</button>
+      <button mat-button mat-dialog-close>Cancel</button>
+    </mat-dialog-actions>
+  </form>

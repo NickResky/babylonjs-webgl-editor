@@ -1,1 +1,83 @@
-<div>Test</div>
+<div>
+    <ng-content></ng-content>
+    <mat-accordion class="sidebar" multi="false">
+        <mat-expansion-panel class="sidebar-item" hideToggle="true">
+            <mat-expansion-panel-header>
+                Material Mappings
+            </mat-expansion-panel-header>
+            <app-material-editor></app-material-editor>
+        </mat-expansion-panel>
+
+        <!-- <mat-expansion-panel class="sidebar-item">
+      <mat-expansion-panel-header>
+        Texture Editor
+      </mat-expansion-panel-header>
+      <app-texture-editor></app-texture-editor>
+    </mat-expansion-panel> -->
+
+        <mat-expansion-panel class="sidebar-item">
+            <mat-expansion-panel-header>
+                Camera Editor
+            </mat-expansion-panel-header>
+            <app-camera-editor></app-camera-editor>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel class="sidebar-item">
+            <mat-expansion-panel-header>
+                Environments
+            </mat-expansion-panel-header>
+            <ng-template matExpansionPanelContent>
+                <app-environments-editor></app-environments-editor>
+            </ng-template>
+            <app-background-editor></app-background-editor>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel class="sidebar-item">
+            <mat-expansion-panel-header>
+                Action Item Editor
+            </mat-expansion-panel-header>
+            <app-action-item-editor></app-action-item-editor>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel class="sidebar-item">
+            <mat-expansion-panel-header>
+                Liveswitcher
+            </mat-expansion-panel-header>
+            <app-liveswitcher></app-liveswitcher>
+            <app-configuration-editor></app-configuration-editor>
+        </mat-expansion-panel>
+
+        <!-- <mat-expansion-panel class="sidebar-item">
+      <mat-expansion-panel-header>
+        Datahub
+      </mat-expansion-panel-header>
+      <app-datahub></app-datahub>
+    </mat-expansion-panel> -->
+
+        <!-- <mat-expansion-panel class="sidebar-item">
+      <mat-expansion-panel-header>
+        Converter
+      </mat-expansion-panel-header>
+      <app-converter></app-converter>
+    </mat-expansion-panel> -->
+
+        <!-- <mat-expansion-panel class="sidebar-item">
+      <mat-expansion-panel-header>
+        Production Export
+      </mat-expansion-panel-header>
+      <app-production-export></app-production-export>
+    </mat-expansion-panel> -->
+
+        <mat-expansion-panel class="sidebar-item">
+            <mat-expansion-panel-header> Hotkeys </mat-expansion-panel-header>
+            <app-hotkeys></app-hotkeys>
+        </mat-expansion-panel>
+
+        <!-- <mat-expansion-panel class="sidebar-item">
+      <mat-expansion-panel-header>
+        File Explorer
+      </mat-expansion-panel-header>
+      <app-file-explorer></app-file-explorer>
+    </mat-expansion-panel> -->
+    </mat-accordion>
+</div>

@@ -1,0 +1,9 @@
+<div *ngIf="!isCwsEntity">
+    <ul>
+        <li *ngFor="let code of properties">
+            <mat-checkbox
+                (change)="toggleProperty(code)"
+                [checked]="code | includes:activeProperties">{{ code }}</mat-checkbox>
+        </li>
+    </ul>
+</div>
