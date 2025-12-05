@@ -925,9 +925,9 @@ export class EntityService {
                     this.setInspectableCustomProperties(m, layerPath, layer);
                     this.processOriginalMaterial(entity, m, layer);
                     layer.addMesh(m);
-                    if (m.material) {
-                        this._scene.addMaterial(m.material);
-                    }
+                    // if (m.material) {
+                    //     this._scene.addMaterial(m.material);
+                    // }
                     this._scene.addMesh(m);
                 }
             }

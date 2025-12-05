@@ -25,6 +25,7 @@ import {
     InspectorService,
     MVDebugLayer
 } from '../../services/inspector/inspector.service';
+import { MaterialService } from '../../services/material/material.service';
 
 @Component({
     selector: 'app-home',
@@ -71,7 +72,7 @@ export class HomeComponent implements AfterViewInit {
         private environmentService: EnvironmentService,
         private actionItemService: ActionItemService,
         private entityService: EntityService,
-        // private materialService: MaterialService,
+        private materialService: MaterialService,
         private inspectorService: InspectorService,
         private elmRef: ElementRef
     ) {}
@@ -249,7 +250,7 @@ export class HomeComponent implements AfterViewInit {
                     break;
                 }
                 case 'KeyL': {
-                    // this.materialService.toggleLightmaps();
+                    this.materialService.toggleLightmaps();
                     break;
                 }
                 case 'KeyC': {
@@ -348,6 +349,13 @@ export class HomeComponent implements AfterViewInit {
         console.log('saveMaterialsAndCreateAllocators');
         this.scene?.materials.forEach((m) => {
             if (m.name.includes('.json')) return;
+
+            const path = `materials/suv/${m.name}.json`;
+            this.materialService.updateMaterial(
+                this._projectSettings.baseProjectUrl,
+                path,
+                m as any
+            );
         });
     }
 
