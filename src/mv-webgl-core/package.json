@@ -1,7 +1,7 @@
 {
     "name": "mv-webgl-core",
     "version": "2.0.59",
-    "description": "Mackevision WebGL Core project",
+    "description": "WebGL Core project",
     "module": "index.ts",
     "scripts": {
         "start": "npm run watch",
@@ -36,7 +36,7 @@
         "url": "git@sv-str-git002.mvision.lan:realtime/mv-webgl-core.git"
     },
     "keywords": [],
-    "author": "Mackevision",
+    "author": "",
     "license": "ISC",
     "dependencies": {
         "babylonjs": "8.24.0",

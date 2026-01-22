@@ -415,20 +415,158 @@ export class InspectorService {
                 }
             }
         );
+        if (this.debugLayer.getInspectorMaterialTextureChangeEvent) {
+            const inspectorMaterialTextureChangeEvent =
+                this.debugLayer.getInspectorMaterialTextureChangeEvent();
+            inspectorMaterialTextureChangeEvent?.subscribe(
+                async (data: { file: File; material: any; props: any }) => {
+                    // Handle Material texture event
+                    const file = data.file;
+                    const material = data.material;
+                    let absoluteTextureUrl = (file as any).path.replace(
+                        /\\/g,
+                        '/'
+                    ); // necessary for windows file system
+                    const baseProjectUrl = this._projectSettings.baseProjectUrl
+                        .replace(/\\/g, '/')
+                        .replace('file://', '');
 
-        const inspectorMaterialTextureChangeEvent =
-            this.debugLayer.getInspectorMaterialTextureChangeEvent();
-        inspectorMaterialTextureChangeEvent?.subscribe(
-            async (data: { file: File; material: any; props: any }) => {
+                    if (!absoluteTextureUrl.includes(baseProjectUrl)) {
+                        this.notifierService.notify(
+                            'error',
+                            'Please select a texture within your project directory.'
+                        );
+                        return;
+                    }
+
+                    let relativeTexturePath = absoluteTextureUrl.replace(
+                        baseProjectUrl,
+                        ''
+                    );
+                    relativeTexturePath = relativeTexturePath.replace(
+                        this.dataService.getActiveEntity().entityConfig
+                            .texturesUrlRelative,
+                        ''
+                    );
+                    if (!this.dataService.allowUppercase) {
+                        if (this.fileAccessService.hasUpperCase(file.name)) {
+                            const errorMessage = `${relativeTexturePath} contains characters with capital letters. This can cause errors. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
+                            this.notifierService.notify('error', errorMessage);
+                            console.warn(errorMessage);
+                            return;
+                        }
+                    }
+                    if (
+                        this.fileAccessService.hasInvalidCharacters(file.name)
+                    ) {
+                        const errorMessage = `${relativeTexturePath} includes forbidden characters. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
+                        this.notifierService.notify('error', errorMessage);
+                        console.warn(errorMessage);
+                        return;
+                    }
+
+                    const materialName = material.name;
+                    const textureBasePath =
+                        baseProjectUrl +
+                        this._projectSettings.entityConfigFile
+                            .texturesUrlRelative;
+
+                    let textureType = data.props.propertyName
+                        ? data.props.propertyName
+                        : data.props.label;
+
+                    if (textureType.toLowerCase() == 'detailmap') {
+                        textureType = 'detailMap';
+                    }
+
+                    const parentAndAffectedMaterials =
+                        this.materialService.getParentAndAffectedMaterials(
+                            material
+                        );
+                    const affectedMaterials =
+                        parentAndAffectedMaterials.affectedMaterials;
+                    const parentMaterial =
+                        parentAndAffectedMaterials.parentMaterial;
+
+                    const texture: Texture =
+                        await this.materialService.updateTextureOnMaterial(
+                            absoluteTextureUrl,
+                            relativeTexturePath,
+                            this._projectSettings.baseProjectUrl,
+                            parentMaterial.id,
+                            textureType,
+                            this.scene,
+                            parentMaterial,
+                            textureBasePath
+                        );
+
+                    if (
+                        textureType.includes('opacity') &&
+                        (file as any).path.includes('.jpg')
+                    ) {
+                        texture.getAlphaFromRGB = true;
+                    }
+
+                    texture.inspectableCustomProperties = [];
+                    texture.inspectableCustomProperties.push({
+                        label: 'Get Alpha from RBG',
+                        propertyName: 'getAlphaFromRGB',
+                        type: InspectableType.Checkbox
+                    });
+
+                    affectedMaterials.forEach((affectedMaterial: Material) => {
+                        affectedMaterial[textureType] = texture;
+                    });
+
+                    this.dataService.updateTexture$.next();
+
+                    this.notifierService.notify(
+                        'success',
+                        `Material: ${materialName} updated with new ${textureType}`
+                    );
+                }
+            );
+        }
+        if (this.debugLayer.getInspectorMaterialTextureRemovedEvent) {
+            const inspectorMaterialTextureRemovedEvent =
+                this.debugLayer.getInspectorMaterialTextureRemovedEvent();
+            inspectorMaterialTextureRemovedEvent?.subscribe(
+                async (data: { material: any; textureType: string }) => {
+                    const materialType = data.material.getClassName();
+
+                    if (data.material[data.textureType]) {
+                        data.material[data.textureType] = null;
+                    } else if (materialType == 'NodeMaterial') {
+                        this.materialService.removeTextureFromNodeMaterial(
+                            data.material,
+                            data.textureType
+                        );
+                    }
+                }
+            );
+        }
+        if (this.debugLayer.getOpenNodeMaterialEditorEvent) {
+            const openNodeMaterialEditorEvent =
+                this.debugLayer.getOpenNodeMaterialEditorEvent();
+            (openNodeMaterialEditorEvent as any)?.subscribe(
+                (nodeMaterial: NodeMaterial) => {
+                    this.openNodeEditor(nodeMaterial);
+                }
+            );
+        }
+
+        if (this.debugLayer.getInspectorEnvironmentTextureChangeEvent) {
+            const environmentTextureChangeEvent =
+                this.debugLayer.getInspectorEnvironmentTextureChangeEvent();
+            environmentTextureChangeEvent?.subscribe((data: { file: File }) => {
                 // Handle Material texture event
-                const file = data.file;
-                const material = data.material;
-                let absoluteTextureUrl = (file as any).path.replace(/\\/g, '/'); // necessary for windows file system
                 const baseProjectUrl = this._projectSettings.baseProjectUrl
                     .replace(/\\/g, '/')
                     .replace('file://', '');
-
-                if (!absoluteTextureUrl.includes(baseProjectUrl)) {
+                const file = data.file;
+                const filePath = (file as any).path.replace(/\\/g, '/'); // necessary for windows file system
+                const texturePath = filePath.replace(file.name, '');
+                if (!filePath.includes(baseProjectUrl)) {
                     this.notifierService.notify(
                         'error',
                         'Please select a texture within your project directory.'
@@ -436,154 +574,27 @@ export class InspectorService {
                     return;
                 }
 
-                let relativeTexturePath = absoluteTextureUrl.replace(
-                    baseProjectUrl,
-                    ''
-                );
-                relativeTexturePath = relativeTexturePath.replace(
-                    this.dataService.getActiveEntity().entityConfig
-                        .texturesUrlRelative,
-                    ''
-                );
                 if (!this.dataService.allowUppercase) {
                     if (this.fileAccessService.hasUpperCase(file.name)) {
-                        const errorMessage = `${relativeTexturePath} contains characters with capital letters. This can cause errors. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
+                        const errorMessage = `${file.name} contains characters with capital letters. This can cause errors. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
                         this.notifierService.notify('error', errorMessage);
                         console.warn(errorMessage);
                         return;
                     }
                 }
                 if (this.fileAccessService.hasInvalidCharacters(file.name)) {
-                    const errorMessage = `${relativeTexturePath} includes forbidden characters. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
+                    const errorMessage = `${file.name} includes forbidden characters. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
                     this.notifierService.notify('error', errorMessage);
                     console.warn(errorMessage);
                     return;
                 }
 
-                const materialName = material.name;
-                const textureBasePath =
-                    baseProjectUrl +
-                    this._projectSettings.entityConfigFile.texturesUrlRelative;
-
-                let textureType = data.props.propertyName
-                    ? data.props.propertyName
-                    : data.props.label;
-
-                if (textureType.toLowerCase() == 'detailmap') {
-                    textureType = 'detailMap';
-                }
-
-                const parentAndAffectedMaterials =
-                    this.materialService.getParentAndAffectedMaterials(
-                        material
-                    );
-                const affectedMaterials =
-                    parentAndAffectedMaterials.affectedMaterials;
-                const parentMaterial =
-                    parentAndAffectedMaterials.parentMaterial;
-
-                const texture: Texture =
-                    await this.materialService.updateTextureOnMaterial(
-                        absoluteTextureUrl,
-                        relativeTexturePath,
-                        this._projectSettings.baseProjectUrl,
-                        parentMaterial.id,
-                        textureType,
-                        this.scene,
-                        parentMaterial,
-                        textureBasePath
-                    );
-
-                if (
-                    textureType.includes('opacity') &&
-                    (file as any).path.includes('.jpg')
-                ) {
-                    texture.getAlphaFromRGB = true;
-                }
-
-                texture.inspectableCustomProperties = [];
-                texture.inspectableCustomProperties.push({
-                    label: 'Get Alpha from RBG',
-                    propertyName: 'getAlphaFromRGB',
-                    type: InspectableType.Checkbox
-                });
-
-                affectedMaterials.forEach((affectedMaterial: Material) => {
-                    affectedMaterial[textureType] = texture;
-                });
-
-                this.dataService.updateTexture$.next();
-
-                this.notifierService.notify(
-                    'success',
-                    `Material: ${materialName} updated with new ${textureType}`
+                this.environmentService.updateEnvironmentTexture(
+                    texturePath,
+                    file.name
                 );
-            }
-        );
-
-        const inspectorMaterialTextureRemovedEvent =
-            this.debugLayer.getInspectorMaterialTextureRemovedEvent();
-        inspectorMaterialTextureRemovedEvent?.subscribe(
-            async (data: { material: any; textureType: string }) => {
-                const materialType = data.material.getClassName();
-
-                if (data.material[data.textureType]) {
-                    data.material[data.textureType] = null;
-                } else if (materialType == 'NodeMaterial') {
-                    this.materialService.removeTextureFromNodeMaterial(
-                        data.material,
-                        data.textureType
-                    );
-                }
-            }
-        );
-
-        const openNodeMaterialEditorEvent =
-            this.debugLayer.getOpenNodeMaterialEditorEvent();
-        (openNodeMaterialEditorEvent as any)?.subscribe(
-            (nodeMaterial: NodeMaterial) => {
-                this.openNodeEditor(nodeMaterial);
-            }
-        );
-
-        const environmentTextureChangeEvent =
-            this.debugLayer.getInspectorEnvironmentTextureChangeEvent();
-        environmentTextureChangeEvent?.subscribe((data: { file: File }) => {
-            // Handle Material texture event
-            const baseProjectUrl = this._projectSettings.baseProjectUrl
-                .replace(/\\/g, '/')
-                .replace('file://', '');
-            const file = data.file;
-            const filePath = (file as any).path.replace(/\\/g, '/'); // necessary for windows file system
-            const texturePath = filePath.replace(file.name, '');
-            if (!filePath.includes(baseProjectUrl)) {
-                this.notifierService.notify(
-                    'error',
-                    'Please select a texture within your project directory.'
-                );
-                return;
-            }
-
-            if (!this.dataService.allowUppercase) {
-                if (this.fileAccessService.hasUpperCase(file.name)) {
-                    const errorMessage = `${file.name} contains characters with capital letters. This can cause errors. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
-                    this.notifierService.notify('error', errorMessage);
-                    console.warn(errorMessage);
-                    return;
-                }
-            }
-            if (this.fileAccessService.hasInvalidCharacters(file.name)) {
-                const errorMessage = `${file.name} includes forbidden characters. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
-                this.notifierService.notify('error', errorMessage);
-                console.warn(errorMessage);
-                return;
-            }
-
-            this.environmentService.updateEnvironmentTexture(
-                texturePath,
-                file.name
-            );
-        });
+            });
+        }
     }
 
     public openNodeEditor(nodeMaterial: NodeMaterial) {

@@ -10,6 +10,7 @@ import { EnvironmentsEditorComponent } from '../../environment-editor/environmen
 import { HotkeysComponent } from '../../hotkeys/hotkeys.component';
 import { LiveswitcherComponent } from '../../liveswitcher/liveswitcher.component';
 import { MaterialEditorComponent } from '../material-editor.component';
+import { ProductionExportComponent } from '../../production-export/production-export.component';
 
 @Component({
     selector: 'app-sidebar',
@@ -28,7 +29,8 @@ import { MaterialEditorComponent } from '../material-editor.component';
         EnvironmentsEditorComponent,
         BackgroundEditorComponent,
         ActionItemEditorComponent,
-        CameraEditorComponent
+        CameraEditorComponent,
+        ProductionExportComponent
     ]
 })
 export class SidebarComponent implements OnInit {

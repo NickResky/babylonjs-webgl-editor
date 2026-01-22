@@ -266,7 +266,7 @@ export class HomeComponent implements AfterViewInit {
                     break;
                 }
                 case 'KeyV': {
-                    // this.materialService.toggleVertexColorHighlight();
+                    this.materialService.toggleVertexColorHighlight();
                     break;
                 }
                 case 'KeyH': {
@@ -350,7 +350,7 @@ export class HomeComponent implements AfterViewInit {
         this.scene?.materials.forEach((m) => {
             if (m.name.includes('.json')) return;
 
-            const path = `materials/suv/${m.name}.json`;
+            const path = `materials/suv/${m.name.replace('MI_GLTF_', '')}.json`;
             this.materialService.updateMaterial(
                 this._projectSettings.baseProjectUrl,
                 path,

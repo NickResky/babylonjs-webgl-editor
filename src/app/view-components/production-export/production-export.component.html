@@ -1,0 +1,128 @@
+<div class="converter">
+    <div
+        style="color: rgb(15, 155, 241); font-weight: 600; margin-bottom: 30px"
+        *ngIf="buildSuccessful"
+    >
+        Production build complete!
+    </div>
+    <div
+        style="color: red; font-weight: 600; margin-bottom: 30px"
+        *ngIf="buildFailed"
+    >
+        Production build failed! Please check the console.
+    </div>
+    <div *ngIf="!blenderPath">
+        <div>
+            Please download Blender version
+            <span style="color: red; font-weight: 600">2.92</span> and select
+            the "blender.exe" file with the button below.
+        </div>
+        <span
+            >Download blender version
+            <span style="color: red; font-weight: 600">2.92</span> here: </span
+        ><a>https://download.blender.org/release/</a>
+        <div>Select zip file instead of installer!</div>
+        <button
+            style="margin-top: 20px"
+            mat-raised-button
+            (click)="chooseBlenderPath()"
+        >
+            Select "blender.exe" on your hard drive
+        </button>
+    </div>
+    <div *ngIf="!nodePath">
+        <div>
+            Please download node and select the "node.exe" file with the button
+            below. Version v10.0 or higher is required.
+        </div>
+        <span>Download node here: </span><a>https://nodejs.org/en/download/</a>
+        <div>Select zip file instead of installer!</div>
+        <button
+            style="margin-top: 20px"
+            mat-raised-button
+            (click)="chooseNodePath()"
+        >
+            Select "node.exe" on your hard drive
+        </button>
+    </div>
+    <div
+        *ngIf="buildInProgress"
+        style="display: flex; align-items: center; margin-bottom: 30px"
+    >
+        <div style="position: relative; height: 60px; width: 60px">
+            <div class="loader-container">
+                <div class="loader">
+                    <div class="lds-ring">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-left: 20px">Build is running</div>
+    </div>
+    <div *ngIf="blenderPath && nodePath">
+        <button
+            mat-raised-button
+            style="margin-bottom: 30px"
+            (click)="selectEntities()"
+            *ngIf="!buildInProgress"
+        >
+            Select Entities
+        </button>
+        <div *ngFor="let entity of entities" class="entity-container">
+            <div class="entity-status-id">
+                <div class="entity-status" [ngClass]="entity.status">
+                    {{ entity.status }}
+                </div>
+                <div class="entity-id">
+                    {{ entity.id }}
+                </div>
+            </div>
+            <div class="entity-log">
+                {{ entity.log }}
+            </div>
+        </div>
+        <mat-checkbox
+            class="convert-textures-checkbox"
+            [checked]="convertTextures"
+        >
+            Convert Textures
+        </mat-checkbox>
+        <button
+            mat-raised-button
+            (click)="startBuild()"
+            *ngIf="entities && entities.length > 0 && !buildInProgress"
+            style="margin-top: 30px"
+        >
+            Run Build
+        </button>
+    </div>
+    <div style="margin-top: 30px" *ngIf="blenderPath && !buildInProgress">
+        <div>
+            Blender path (Version
+            <span style="color: red; font-weight: 600">2.92</span> required)
+        </div>
+        <div>{{ blenderPath }}</div>
+        <button
+            style="margin-top: 20px"
+            mat-raised-button
+            (click)="chooseBlenderPath()"
+        >
+            Change blender path
+        </button>
+    </div>
+    <div style="margin-top: 30px" *ngIf="nodePath && !buildInProgress">
+        <div>Node path:</div>
+        <div>{{ nodePath }}</div>
+        <button
+            style="margin-top: 20px"
+            mat-raised-button
+            (click)="chooseNodePath()"
+        >
+            Change node path
+        </button>
+    </div>
+</div>

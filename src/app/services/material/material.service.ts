@@ -3,9 +3,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import {
     AbstractMesh,
+    BaseTexture,
     InputBlock,
     Material,
     NodeMaterial,
+    PBRMaterial,
     PBRMetallicRoughnessBlock,
     Scene,
     Texture,
@@ -21,6 +23,10 @@ import {
     MVMaterialMappingsJson,
     MVSwitchMaterialMapping
 } from 'mv-core';
+import { createCanvas } from 'canvas';
+import * as PNG from 'pngjs';
+import * as jpeg from 'jpeg-js';
+import { Buffer } from 'buffer';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { NewAllocatorComponent } from '../../view-components/material-editor/allocator-new/allocator-new.component';
 import { MappingEditorComponent } from '../../view-components/material-editor/mapping-editor/mapping-editor.component';
@@ -184,7 +190,77 @@ export class MaterialService {
         );
     }
 
-    public updateMaterial(
+    collectSerializedTextures(serializedMaterial: any) {
+        const out_set: any[] = [];
+        // --- Standard PBR textures ---
+        const standard = [
+            'albedoTexture',
+            'metallicTexture',
+            'bumpTexture',
+            'emissiveTexture',
+            'ambientTexture',
+            'opacityTexture'
+        ];
+
+        for (const texProp of standard) {
+            const tex = serializedMaterial[texProp];
+            if (tex) {
+                out_set.push(tex);
+            }
+        }
+
+        // --- Clear Coat textures ---
+        const cc = serializedMaterial.clearCoat;
+        if (cc) {
+            if (cc.texture) {
+                out_set.push(cc.texture);
+            }
+            if (cc.bumpTexture) {
+                out_set.push(cc.bumpTexture);
+            }
+            if (cc.textureRoughness) {
+                out_set.push(cc.textureRoughness);
+            }
+        }
+        return out_set;
+    }
+
+    collectMaterialTextures(material: PBRMaterial) {
+        const out_set: BaseTexture[] = [];
+        // --- Standard PBR textures ---
+        const standard = [
+            'albedoTexture',
+            'metallicTexture',
+            'bumpTexture',
+            'emissiveTexture',
+            'ambientTexture',
+            'opacityTexture'
+        ];
+
+        for (const texProp of standard) {
+            const tex = material[texProp];
+            if (tex) {
+                out_set.push(tex);
+            }
+        }
+
+        // --- Clear Coat textures ---
+        const cc = material.clearCoat;
+        if (cc) {
+            if (cc.texture) {
+                out_set.push(cc.texture);
+            }
+            if (cc.bumpTexture) {
+                out_set.push(cc.bumpTexture);
+            }
+            if (cc.textureRoughness) {
+                out_set.push(cc.textureRoughness);
+            }
+        }
+        return out_set;
+    }
+
+    public async updateMaterial(
         basePath: string,
         fileName: string,
         material: MVMaterial | NodeMaterial
@@ -192,7 +268,75 @@ export class MaterialService {
         fileName = material['parentMaterialName']
             ? material['parentMaterialName']
             : fileName;
+
+        const materialClassName = material.getClassName();
+
+        if (material instanceof PBRMaterial) {
+            // Collect from materials
+            if (material.name.includes('Wood')) {
+                debugger;
+            }
+            const textureSet = this.collectMaterialTextures(material);
+
+            const path_relative = 'materials/suv/textures';
+            const outDir = `${basePath.replace('file://', '')}`;
+
+            for (const tex of textureSet) {
+                if (!tex) continue;
+
+                // Get the raw pixel data
+                const buffer: any = await tex.readPixels();
+
+                // Create a canvas to write the PNG
+                const width = tex.getSize().width;
+                const height = tex.getSize().height;
+                const canvas = createCanvas(width, height);
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.createImageData(width, height);
+                imageData.data.set(buffer);
+                ctx.putImageData(imageData, 0, 0);
+
+                let hasAlpha = false;
+                for (let i = 3; i < buffer.length; i += 4) {
+                    if (buffer[i] < 255) {
+                        hasAlpha = true;
+                        break;
+                    }
+                }
+                const ext = hasAlpha ? 'png' : 'jpg';
+                const texName = `${tex.name}.${ext}`;
+                const filePathRelative = path_relative + '/' + texName;
+                const filePath = outDir + '/' + filePathRelative;
+                console.log(' → Exporting texture:', texName);
+
+                const mime: any = hasAlpha ? 'image/png' : 'image/jpeg';
+                const dataUrl = canvas.toDataURL(
+                    mime,
+                    hasAlpha ? undefined : 0.95
+                );
+
+                // Strip base64 header
+                const base64 = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+                const fileBuffer = Buffer.from(base64, 'base64');
+
+                (window as any).electronAPI.fsWriteFileSync(
+                    filePath,
+                    fileBuffer
+                );
+                tex.gammaSpace = true;
+                tex['url'] = filePathRelative;
+                if (tex['base64String']) {
+                    delete tex['base64String'];
+                }
+            }
+        }
+
         const materialSerialized: any = material.serialize();
+        const textureSet = this.collectMaterialTextures(materialSerialized);
+        for (const tex of textureSet) {
+            if (!tex) continue;
+            tex.gammaSpace = true;
+        }
         if (material instanceof MVMaterial) {
             materialSerialized['indexOfRefraction'] =
                 material.indexOfRefraction;
@@ -211,7 +355,6 @@ export class MaterialService {
         }
         materialSerialized.name = fileName;
         materialSerialized.id = fileName;
-        const materialClassName = material.getClassName();
 
         if (materialClassName == 'NodeMaterial') {
             /**

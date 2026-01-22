@@ -1,6 +1,6 @@
 # mv-webgl-core
 
-Mackevision WebGL Core project.
+WebGL Core project.
 
 ## Included Commands
 

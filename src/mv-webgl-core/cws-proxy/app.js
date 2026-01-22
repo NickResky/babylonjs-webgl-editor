@@ -3,43 +3,54 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     app = express();
 
-var myLimit = typeof(process.argv[2]) != 'undefined' ? process.argv[2] : '100kb';
+var myLimit = typeof process.argv[2] != 'undefined' ? process.argv[2] : '100kb';
 console.log('Using limit: ', myLimit);
 
-app.use(bodyParser.json({limit: myLimit}));
+app.use(bodyParser.json({ limit: myLimit }));
 
 app.all('*', function (req, res, next) {
-
     // Set CORS headers: allow all origins, methods, and headers: you may want to lock this down in a production environment
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, PUT, PATCH, POST, DELETE");
-    res.header("Access-Control-Allow-Headers", req.header('access-control-request-headers'));
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, PATCH, POST, DELETE');
+    res.header(
+        'Access-Control-Allow-Headers',
+        req.header('access-control-request-headers')
+    );
 
     if (req.method === 'OPTIONS') {
         // CORS Preflight
         res.send();
     } else {
-        var url = "https://cws.mackevision.com"
-        url = "https://porwgl-production-eu-west-1.mvpag-services.com/"
+        var url = '';
+        url = '';
         var targetURL = req.header('Target-URL') || url; // Target-URL ie. https://example.com or http://example.com
         if (!targetURL) {
-            res.send(500, { error: 'There is no Target-Endpoint header in the request' });
+            res.send(500, {
+                error: 'There is no Target-Endpoint header in the request'
+            });
             return;
         }
-        request({ url: targetURL + req.url, method: 'POST', json: req.body, headers: {
-            'Authorization': req.header('Authorization'),
-            'cookie': '_ga=GA1.2.1666025692.1619441107; _gid=GA1.2.358002034.1627300960',
-            'authority': 'api.development.webcc.ferrari.mackevision-services.com',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-site'
-        } },
+        request(
+            {
+                url: targetURL + req.url,
+                method: 'POST',
+                json: req.body,
+                headers: {
+                    Authorization: req.header('Authorization'),
+                    cookie: '_ga=GA1.2.1666025692.1619441107; _gid=GA1.2.358002034.1627300960',
+                    authority: '',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-site'
+                }
+            },
             function (error, response, body) {
                 if (error) {
-                    console.error('error: ' + response.statusCode)
+                    console.error('error: ' + response.statusCode);
                 }
-//                console.log(body);
-            }).pipe(res);
+                //                console.log(body);
+            }
+        ).pipe(res);
     }
 });
 

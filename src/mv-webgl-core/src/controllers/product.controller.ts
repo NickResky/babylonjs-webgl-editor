@@ -26,14 +26,17 @@ export class ProductController {
      * Creates a new ProductController
      */
     constructor(
-        @inject(TYPES.ConfigurationService) private _configurationService: ConfigurationService,
+        @inject(TYPES.ConfigurationService)
+        private _configurationService: ConfigurationService,
         @inject(TYPES.EntityService) private _entityService: EntityService,
-        @inject(TYPES.EventDispatcherService) private _eventDispatcherService: EventDispatcherService,
+        @inject(TYPES.EventDispatcherService)
+        private _eventDispatcherService: EventDispatcherService,
         @inject(TYPES.CameraService) private _cameraService: CameraService,
         @inject(TYPES.PlatformService) private _platform: PlatformService,
-        @inject(TYPES.MVSceneOptimizerService) private _sceneOptimizerService: MVSceneOptimizerService,
+        @inject(TYPES.MVSceneOptimizerService)
+        private _sceneOptimizerService: MVSceneOptimizerService,
         @inject(TYPES.Scene) private _scene: Scene,
-        @inject(TYPES.CoreSettings) private _settings: CoreSettings,
+        @inject(TYPES.CoreSettings) private _settings: CoreSettings
     ) {}
 
     /**
@@ -48,7 +51,7 @@ export class ProductController {
         relativeEntityConfigUrlOrEntityConfig: string,
         defaultConfigurationCodes?: string[],
         baseUrl?: string,
-        preventSceneFreezing?: boolean,
+        preventSceneFreezing?: boolean
     ): Promise<MVEntity> {
         const loadingStartTimeInMs = Date.now();
 
@@ -61,15 +64,23 @@ export class ProductController {
             this._entityService.unfreezeMaterials();
         }
 
-
         const entityBaseUrl = baseUrl ? baseUrl : this._settings.assetsBaseUrl;
 
         // Load the EntityConfig either by loading via JSON or by parsing the data input
         let entityConfig: MVEntityConfig;
         if (relativeEntityConfigUrlOrEntityConfig.includes('data:')) {
-            entityConfig = JSON.parse(relativeEntityConfigUrlOrEntityConfig.split('data:')[1]);
+            console.log('############ PROD ############');
+            console.log(
+                relativeEntityConfigUrlOrEntityConfig.split('data:')[1]
+            );
+            console.log('############ PROD ############');
+            entityConfig = JSON.parse(
+                relativeEntityConfigUrlOrEntityConfig.split('data:')[1]
+            );
         } else {
-            entityConfig = await loadJson<MVEntityConfig>(entityBaseUrl + relativeEntityConfigUrlOrEntityConfig);
+            entityConfig = await loadJson<MVEntityConfig>(
+                entityBaseUrl + relativeEntityConfigUrlOrEntityConfig
+            );
         }
 
         // Meshes and the rule engine config are loaded relative to the entity config file.
@@ -77,14 +88,16 @@ export class ProductController {
         entityConfig.entityConfigBaseUrl = entityBaseUrl;
 
         if (entityConfig.postProcessingConfiguration) {
-            this._sceneOptimizerService.setupPostProcess(entityConfig.postProcessingConfiguration);
+            this._sceneOptimizerService.setupPostProcess(
+                entityConfig.postProcessingConfiguration
+            );
         }
 
         // Create new Entity and add it to the EntityService
         let entity: MVEntity = await this._entityService.addProduct(
             entityConfig,
             entityConfig.id,
-            this.onLoadingProgressUpdate$,
+            this.onLoadingProgressUpdate$
         );
 
         // Init entity
@@ -95,33 +108,43 @@ export class ProductController {
         // Apply start configuration to entity
         const configurationLoadingStartTimeInMs = Date.now();
 
-        const updateConfigurationPromise = this._configurationService.updateConfiguration(
-            entity,
-            defaultConfigurationCodes ? defaultConfigurationCodes : [],
-        );
+        const updateConfigurationPromise =
+            this._configurationService.updateConfiguration(
+                entity,
+                defaultConfigurationCodes ? defaultConfigurationCodes : []
+            );
 
-        const loadNonConfigurableLayerWithoutUncompressingPromise = this._entityService.loadNonConfigurableLayerWithoutUncompressing(
-            entity,
-        );
+        const loadNonConfigurableLayerWithoutUncompressingPromise =
+            this._entityService.loadNonConfigurableLayerWithoutUncompressing(
+                entity
+            );
 
         const loadRigPromise = this._entityService.loadRig(entity);
 
         await Promise.all([loadRigPromise, updateConfigurationPromise]);
 
-        const configurationLoadingTimeInS = (Date.now() - configurationLoadingStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Configuration loading time in seconds: ${configurationLoadingTimeInS}`);
+        const configurationLoadingTimeInS =
+            (Date.now() - configurationLoadingStartTimeInMs) / 1000;
+        MVLogger.debug(
+            `ProductController: Configuration loading time in seconds: ${configurationLoadingTimeInS}`
+        );
 
-        const setupAnimationsPromise = this._entityService.setupAnimations(entity);
+        const setupAnimationsPromise =
+            this._entityService.setupAnimations(entity);
 
         await loadNonConfigurableLayerWithoutUncompressingPromise; // TODO disable?
 
         const layerLoadingStartTimeInMs = Date.now();
 
-        const applyLayerConfigurationPromise = this._entityService.applyLayerConfiguration(entity);
+        const applyLayerConfigurationPromise =
+            this._entityService.applyLayerConfiguration(entity);
         await Promise.all([applyLayerConfigurationPromise]);
 
-        const layerLoadingTimeInS = (Date.now() - layerLoadingStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Layer loading time in seconds: ${layerLoadingTimeInS}`);
+        const layerLoadingTimeInS =
+            (Date.now() - layerLoadingStartTimeInMs) / 1000;
+        MVLogger.debug(
+            `ProductController: Layer loading time in seconds: ${layerLoadingTimeInS}`
+        );
 
         // Add configured entity to the scene
         this._entityService.addRigToScene(entity);
@@ -131,23 +154,31 @@ export class ProductController {
         const applyMaterialsStartTimeInMs = Date.now();
 
         // Apply current materials to entity
-        const applyMaterialsPromise = this._entityService.applyMaterials(entity);
+        const applyMaterialsPromise =
+            this._entityService.applyMaterials(entity);
 
         await Promise.all([applyMaterialsPromise]);
 
-        const applyMaterialsTimeInS = (Date.now() - applyMaterialsStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Apply materials time in seconds: ${applyMaterialsTimeInS}`);
+        const applyMaterialsTimeInS =
+            (Date.now() - applyMaterialsStartTimeInMs) / 1000;
+        MVLogger.debug(
+            `ProductController: Apply materials time in seconds: ${applyMaterialsTimeInS}`
+        );
 
         this._cameraService.updateMeshesToBeHiddenOnCameraIntersection();
         this._cameraService.updateActiveProductEntity(entity);
 
-        this._eventDispatcherService.publish(MVEventTypes.onProductLoaded, { entity });
+        this._eventDispatcherService.publish(MVEventTypes.onProductLoaded, {
+            entity
+        });
         MVLogger.debug(`ProductController: Applying materials complete`);
 
         await Promise.all([setupAnimationsPromise]);
 
         const totalLoadingTimeInS = (Date.now() - loadingStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Total loading time in seconds: ${totalLoadingTimeInS}`);
+        MVLogger.debug(
+            `ProductController: Total loading time in seconds: ${totalLoadingTimeInS}`
+        );
 
         if (
             this._settings.productionMode &&
@@ -156,12 +187,14 @@ export class ProductController {
         ) {
             this._sceneOptimizerService.restoreHardwareScalingLevel;
             this._sceneOptimizerService.unfreezeHardwareScalingLevel();
-            this._entityService.disposeUnusedMaterialsAndTextures(0).then(async () => {
-                // if (this._cameraService.getActiveCameraShot() && !preventSceneFreezing) {
-                //   await this._entityService.freezeMaterialsAfterTimeout(0);
-                //   this._entityService.freezeMeshes(1000);
-                // }
-            });
+            this._entityService
+                .disposeUnusedMaterialsAndTextures(0)
+                .then(async () => {
+                    // if (this._cameraService.getActiveCameraShot() && !preventSceneFreezing) {
+                    //   await this._entityService.freezeMaterialsAfterTimeout(0);
+                    //   this._entityService.freezeMeshes(1000);
+                    // }
+                });
         }
 
         this._entityService._productUpdateInProgress = false;
@@ -178,7 +211,7 @@ export class ProductController {
     public async updateConfiguration(
         id: string,
         configurationCodes: string[],
-        preventSceneFreezing?: boolean,
+        preventSceneFreezing?: boolean
     ): Promise<MVEntity> {
         const loadingStartTimeInMs = Date.now();
 
@@ -201,41 +234,64 @@ export class ProductController {
 
         const configurationLoadingStartTimeInMs = Date.now();
 
-        entity = await this._configurationService.updateConfiguration(entity, configurationCodes);
+        entity = await this._configurationService.updateConfiguration(
+            entity,
+            configurationCodes
+        );
 
-        const configurationLoadingTimeInS = (Date.now() - configurationLoadingStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Configuration loading time in seconds: ${configurationLoadingTimeInS}`);
+        const configurationLoadingTimeInS =
+            (Date.now() - configurationLoadingStartTimeInMs) / 1000;
+        MVLogger.debug(
+            `ProductController: Configuration loading time in seconds: ${configurationLoadingTimeInS}`
+        );
 
         const animationUpdateStartTimeInMs = Date.now();
 
-        await this._entityService.waitUntilAnimationsHaveFinishedPlaying(entity);
+        await this._entityService.waitUntilAnimationsHaveFinishedPlaying(
+            entity
+        );
 
         const previousAnimations = this._entityService.cloneAnimations(entity);
 
         await this._entityService.resetAnimations(entity);
         this._entityService.resetRigOffset(entity);
 
-        const animationUpdateTimeInS = (Date.now() - animationUpdateStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Animation update time in seconds: ${animationUpdateTimeInS}`);
+        const animationUpdateTimeInS =
+            (Date.now() - animationUpdateStartTimeInMs) / 1000;
+        MVLogger.debug(
+            `ProductController: Animation update time in seconds: ${animationUpdateTimeInS}`
+        );
 
         const layerLoadingStartTimeInMs = Date.now();
 
         await this._entityService.applyLayerConfiguration(entity);
 
-        const layerLoadingTimeInS = (Date.now() - layerLoadingStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Layer loading time in seconds: ${layerLoadingTimeInS}`);
+        const layerLoadingTimeInS =
+            (Date.now() - layerLoadingStartTimeInMs) / 1000;
+        MVLogger.debug(
+            `ProductController: Layer loading time in seconds: ${layerLoadingTimeInS}`
+        );
 
         this._entityService.applyRigOffset(entity);
-        await this._entityService.setAnimationsToPreviousState(entity, previousAnimations);
+        await this._entityService.setAnimationsToPreviousState(
+            entity,
+            previousAnimations
+        );
 
         const applyMaterialsStartTimeInMs = Date.now();
 
         await this._entityService.applyMaterials(entity);
 
-        const applyMaterialsTimeInS = (Date.now() - applyMaterialsStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Apply materials time in seconds: ${applyMaterialsTimeInS}`);
+        const applyMaterialsTimeInS =
+            (Date.now() - applyMaterialsStartTimeInMs) / 1000;
+        MVLogger.debug(
+            `ProductController: Apply materials time in seconds: ${applyMaterialsTimeInS}`
+        );
 
-        this._eventDispatcherService.publish(MVEventTypes.onProductConfigurationApplied, { entity });
+        this._eventDispatcherService.publish(
+            MVEventTypes.onProductConfigurationApplied,
+            { entity }
+        );
         if (
             this._settings.productionMode &&
             this._entityService.activeEnvironmentEntity &&
@@ -244,18 +300,25 @@ export class ProductController {
             // await waitForSceneReady(this._scene);
             this._sceneOptimizerService.restoreHardwareScalingLevel();
             this._sceneOptimizerService.unfreezeHardwareScalingLevel(500);
-            this._entityService.disposeUnusedMaterialsAndTextures(0).then(async () => {
-                if (this._cameraService.getActiveCameraShot() && !preventSceneFreezing) {
-                    await this._entityService.freezeMaterialsAfterTimeout();
-                    this._entityService.freezeMeshes();
-                }
-            });
+            this._entityService
+                .disposeUnusedMaterialsAndTextures(0)
+                .then(async () => {
+                    if (
+                        this._cameraService.getActiveCameraShot() &&
+                        !preventSceneFreezing
+                    ) {
+                        await this._entityService.freezeMaterialsAfterTimeout();
+                        this._entityService.freezeMeshes();
+                    }
+                });
         }
 
         this._entityService._productUpdateInProgress = false;
 
         const totalLoadingTimeInS = (Date.now() - loadingStartTimeInMs) / 1000;
-        MVLogger.debug(`ProductController: Total update time in seconds: ${totalLoadingTimeInS}`);
+        MVLogger.debug(
+            `ProductController: Total update time in seconds: ${totalLoadingTimeInS}`
+        );
 
         return entity;
     }

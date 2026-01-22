@@ -1,0 +1,153 @@
+#! //tools/tools/tools_config/SYSTEM/SOFTWARE/NUKE/11.2v4/Windows_NT.x64/nuke-11.2.4.dll -nx
+#write_info Write1 file:"D:/Workspaces/Ferrari_WebGL_nreschke_DL143/content/textures_mobile//ferrari/_environments/whiteroom/Sky_WR.jpg" format:"1024 576 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 500" fps:"0" colorspace:"default (sRGB)" datatype:"8 bit" transfer:"unknown" views:"main" colorManagement:"Nuke"
+version 11.2 v4
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="-2569" y="-9" w="2560" h="1361" maximized="1" screen="1">
+        <splitter orientation="1">
+            <split size="46"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="1891" stretch="1"/>
+            <splitter orientation="2">
+                <split size="768"/>
+                <dock id="" activePageId="Viewer.1">
+                    <page id="Viewer.1"/>
+                </dock>
+                <split size="541"/>
+                <dock id="" activePageId="DAG.1">
+                    <page id="DAG.1"/>
+                    <page id="Curve Editor.1"/>
+                    <page id="DopeSheet.1"/>
+                </dock>
+            </splitter>
+            <split size="615"/>
+            <dock id="" activePageId="uk.co.thefoundry.scripteditor.2">
+                <page id="Properties.1"/>
+                <page id="uk.co.thefoundry.backgroundrenderview.1"/>
+                <page id="uk.co.thefoundry.scripteditor.2"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name D:/Code/mv-webgl-pipeline-tools/mobile_textures_converter/mobile_textures_converter.nk
+ last_frame 500
+ fps 25
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ colorManagement Nuke
+ workingSpaceLUT linear
+ monitorLut sRGB
+ int8Lut sRGB
+ int16Lut sRGB
+ logLut Cineon
+ floatLut linear
+ addUserKnob {20 "Script Settings"}
+ addUserKnob {26 mvDevider l "" +STARTLINE}
+ addUserKnob {22 mvSaveAsButton l "  Save As...  " -STARTLINE T "import mvNukePy.mvScriptSave as mvScriptSave\nmvScriptSave.mvScriptSaveAs()"}
+ addUserKnob {22 mvOpenButton l "  Open...  " -STARTLINE T "import mvNukePy.mvScriptOpen as mvScriptOpen\nmvScriptOpen.mvScriptOpen()"}
+ addUserKnob {26 mvDevider l "" +STARTLINE}
+ addUserKnob {4 mvProjectType l "project type" +HIDDEN M {SHOT-BASED}}
+ addUserKnob {4 mvScriptSubType l "script type" M {other shot scene project}}
+ addUserKnob {26 mvDevider l "" +STARTLINE}
+ addUserKnob {35 mvProjectChoice l project M {2000000700 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('2000000700')" 8001000199 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001000199')" 8001000757 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001000757')" 8001000811 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001000811')" 8001001132 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001132')" 8001001136 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001136')" 8001001147 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001147')" 8001001161 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001161')" 8001001188 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001188')" 8001001190 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001190')" 8001001212 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001212')" 8001001269 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001269')" 8001001318 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001318')" 8001001330 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001330')" 8001001482 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001482')" 8001001524 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001524')" 8001001654 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001654')" 8001001660 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001660')" 8001001665 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001665')" 8001001671 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001671')" 8001001716 "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('8001001716')" STR-1006-00179-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1006-00179-DA')" STR-1011-00337-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1011-00337-DA')" STR-1310-00651-MVS "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1310-00651-MVS')" STR-1412-00585-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1412-00585-DA')" STR-1412-00586-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1412-00586-DA')" STR-1508-00444-MVS "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1508-00444-MVS')" STR-1508-00482-MVS "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1508-00482-MVS')" STR-1508-00485-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1508-00485-DA')" STR-1509-00500-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1509-00500-DA')" STR-1509-00501-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1509-00501-DA')" STR-1509-00539-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1509-00539-DA')" STR-1509-00540-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1509-00540-DA')" STR-1510-00574-MVS "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1510-00574-MVS')" STR-1512-00706-DA "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1512-00706-DA')" STR-1601-95043-MVS "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1601-95043-MVS')" STR-1609-00275-AUD "import mvNukePy\nmvNukePy.mvScriptSetup.mvProjectChanged('STR-1609-00275-AUD')"}}
+ addUserKnob {1 mvProject l "" -STARTLINE}
+ addUserKnob {35 mvSceneChoice l scene M {"" ""}}
+ addUserKnob {1 mvScene l "" -STARTLINE}
+ addUserKnob {35 mvShotChoice l shot M {"" ""}}
+ addUserKnob {1 mvShot l "" -STARTLINE}
+ addUserKnob {35 mvVersionChoice l version M {"no scripts found..." ""}}
+ addUserKnob {1 mvVersion l "" -STARTLINE}
+ mvVersion 001
+ addUserKnob {22 mvVersionUpButton l "  Version Up  " -STARTLINE T mvNukeScript.mvVersionUp()}
+ addUserKnob {1 mvScriptComment l "comment (optional)"}
+ addUserKnob {1 mvArtist l "artist name (auto)" +DISABLED}
+ mvArtist nreschke
+ addUserKnob {43 mvShotDescription l "description (optional)"}
+ addUserKnob {26 mvDevider l "" +STARTLINE}
+ addUserKnob {6 mvWorkspace l "currently local" -STARTLINE +INVISIBLE}
+ addUserKnob {1 mvWorkspaceType l "current workspace" +DISABLED +INVISIBLE}
+ addUserKnob {1 mvScriptType l "script type" +INVISIBLE}
+ mvScriptType other
+ addUserKnob {20 "Advanced Settings"}
+ addUserKnob {26 mvAdvanced l "" +STARTLINE T "Advanced Settings"}
+ addUserKnob {26 mvDevider l "" +STARTLINE}
+ addUserKnob {4 mvRenderType l "render type" M {PRE " PRERENDER" " TEST"}}
+ addUserKnob {1 mvRenderPath l "render path (auto)"}
+ addUserKnob {1 mvRenderName l "render name (auto)"}
+ addUserKnob {1 mvRenderNameVlatest l "vlatest name (auto)"}
+ addUserKnob {26 mvDevider l "" +STARTLINE}
+ addUserKnob {1 mvProjectServer l "project server (auto)"}
+ addUserKnob {1 mvLocalPath l "local path (auto)"}
+ addUserKnob {1 mvArchivePath l "archive path"}
+ addUserKnob {26 mvRdevider l "" +STARTLINE}
+ addUserKnob {26 mvRenderSettings l "" +STARTLINE T "Render Settings"}
+ addUserKnob {26 mvRdevider l "" +STARTLINE}
+ addUserKnob {6 mvUseRenderSettings l " use render settings" -STARTLINE}
+ addUserKnob {6 mvStartSuspended l " blocked" +STARTLINE}
+ addUserKnob {3 mvPriority l priority}
+ addUserKnob {3 mvInstances l instances}
+ addUserKnob {1 mvHostProcessors l "host processors"}
+ addUserKnob {1 mvJobRequirements l "job requirements"}
+ addUserKnob {1 mvFlags l flags}
+ addUserKnob {3 mvFirstFrame l "first frame"}
+ addUserKnob {3 mvLastFrame l "last frame"}
+ addUserKnob {1 mvRenderGroups l "render groups"}
+ addUserKnob {1 mvRenderCluster l "priority cluster"}
+ addUserKnob {4 mvExecutionType l "Execution Type" M {"Individual Frames" "Chunks with n Frames" "Split into n Partitions"}}
+ addUserKnob {3 mvExecutionTypeValue l "Execution Type Value"}
+ addUserKnob {4 mvExecutionOrder l "Execution Order" M {ascending descending binary}}
+ addUserKnob {3 mvMaxServer l maxServer}
+ addUserKnob {1 mvRenderLicence l licence}
+ addUserKnob {1 mvAddSlaves l "additional slaves"}
+ addUserKnob {3 mvBatchSize l "batch size"}
+ addUserKnob {26 _ l "" +STARTLINE}
+ addUserKnob {26 coba_settings l "" +STARTLINE T "COBA Settings"}
+ addUserKnob {26 _ l "" +STARTLINE}
+ addUserKnob {2 coba_file l "COBA File (*.xml, *.coba)"}
+ addUserKnob {2 switchlist_file l "Switchlist File (*.txt)"}
+}
+Read {
+ inputs 0
+ file_type jpeg
+ file D:/Workspaces/Ferrari_WebGL_nreschke_DL143/content/textures//mobile_texture_convertion_settings.json
+ format "1920 1080 0 0 1920 1080 1 HD_1080"
+ origset true
+ name Read1
+ xpos -117
+ ypos -327
+}
+Reformat {
+ type "to box"
+ format "512 512 0 0 512 512 1 square_512"
+ box_width 1024
+ scale 0.25
+ name Reformat1
+ xpos -157
+ ypos -157
+}
+set N22d24700 [stack 0]
+Viewer {
+ frame_range 1-500
+ fps 25
+ name Viewer1
+ xpos -40
+ ypos -10
+}
+push $N22d24700
+Write {
+ channels rgba
+ file D:/Workspaces/Ferrari_WebGL_nreschke_DL143/content/textures_mobile//ferrari/_environments/whiteroom/Sky_WR.jpg
+ file_type jpeg
+ _jpeg_quality 0.5
+ checkHashOnRead false
+ version 4929
+ name Write1
+ selected true
+ xpos -172
+ ypos -24
+}

@@ -1,0 +1,21 @@
+{
+  "name": "webgl_pipeline_tools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "start.js",
+  "scripts": {
+    "start": "npm run fbx_to_draco_glb",
+    "fbx_to_draco_glb": "node setupFileGroups && python blender_tools/fbx_to_glb_CLI.py && node glb_to_glb_draco.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {
+    "fbx2gltf": "^0.9.7-p1",
+    "gltf-pipeline": "^2.1.9",
+    "image-size": "^0.9.3",
+    "node-fetch": "^2.6.1",
+    "rimraf": "^3.0.2",
+    "sharp": "^0.26.3"
+  }
+}
