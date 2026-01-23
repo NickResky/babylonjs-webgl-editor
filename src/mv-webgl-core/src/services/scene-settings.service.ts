@@ -7,18 +7,23 @@ import {
     Layer,
     LensFlare,
     Light,
+    Matrix,
     Mesh,
     PointLight,
     Scene,
     Texture,
     TransformNode,
-    Vector3,
+    Vector3
 } from 'babylonjs';
 import { inject, injectable } from 'inversify';
 import { isBoolean, isColor3, isColor4, isNumber, isString } from '../helper';
 import { TYPES } from '../ioc/types';
 import { CoreError, MVLogger } from '../logging';
-import { LensFlareSettings, LensFlareSystemSettings, MVEnvironmentConfig } from '../models';
+import {
+    LensFlareSettings,
+    LensFlareSystemSettings,
+    MVEnvironmentConfig
+} from '../models';
 import { MVEnvironmentEntity } from '../models/entity/mv-environment-entity';
 import { MVLensFlareSystem } from '../models/lens-flare/MVLensFlareSystem';
 import { CoreSettings } from '../settings';
@@ -49,7 +54,7 @@ export class SceneSettingsService {
         @inject(TYPES.Scene) private _scene: Scene,
         @inject(TYPES.TextureService) private _textureService: TextureService,
         @inject(TYPES.CoreSettings) private _coreSettings: CoreSettings,
-        @inject(TYPES.CoreSettings) private _entityService: EntityService,
+        @inject(TYPES.CoreSettings) private _entityService: EntityService
     ) {}
 
     /**
@@ -57,15 +62,28 @@ export class SceneSettingsService {
      * @param cameraCategory -
      * @param entity - Optional.
      */
-    public async updateSceneSettings(cameraCategory: string, entity: MVEnvironmentEntity): Promise<void> {
-        const environmentConfig: MVEnvironmentConfig = entity.mv_environmentConfigs[cameraCategory];
+    public async updateSceneSettings(
+        cameraCategory: string,
+        entity: MVEnvironmentEntity
+    ): Promise<void> {
+        const environmentConfig: MVEnvironmentConfig =
+            entity.mv_environmentConfigs[cameraCategory];
 
         if (!environmentConfig) return;
         if (entity.activeEnvironmentCode == cameraCategory) return;
 
-        const setupBackgroundImagesPromise = this.setupBackgroundImage(entity, environmentConfig);
-        const setupEnvironmentTexturesPromise = this.setupEnvironmentTextures(entity, environmentConfig);
-        await Promise.all([setupBackgroundImagesPromise, setupEnvironmentTexturesPromise]);
+        const setupBackgroundImagesPromise = this.setupBackgroundImage(
+            entity,
+            environmentConfig
+        );
+        const setupEnvironmentTexturesPromise = this.setupEnvironmentTextures(
+            entity,
+            environmentConfig
+        );
+        await Promise.all([
+            setupBackgroundImagesPromise,
+            setupEnvironmentTexturesPromise
+        ]);
 
         this._activeEnvironmentEntity = entity;
 
@@ -82,8 +100,9 @@ export class SceneSettingsService {
                 }
             } else if (key.toLowerCase().includes('background')) {
                 await this.loadBackgroundImage(
-                    entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.texturesUrlRelative,
-                    value as string,
+                    entity.entityConfig.entityConfigBaseUrl +
+                        entity.entityConfig.texturesUrlRelative,
+                    value as string
                 );
             } else if (isString(value) || isNumber(value) || isBoolean(value)) {
                 // Handle string, number and boolean
@@ -102,10 +121,12 @@ export class SceneSettingsService {
                 MVLogger.warn(
                     CoreError.InvalidParameterError,
                     `Property ${key} with value: ${value} Currently not supported. Value: `,
-                    value,
+                    value
                 );
             }
         }
+
+        // this._scene.environmentIntensity = 2; //environmentConfig.environmentIntensity;
 
         await this.setupLensFlares(environmentConfig);
     }
@@ -123,9 +144,14 @@ export class SceneSettingsService {
     }
 
     public async setupLensFlares(environmentConfig: MVEnvironmentConfig) {
-        const lensFlareSystemSettings: LensFlareSystemSettings = environmentConfig.lensFlareSystem;
+        const lensFlareSystemSettings: LensFlareSystemSettings =
+            environmentConfig.lensFlareSystem;
 
-        if (lensFlareSystemSettings && lensFlareSystemSettings.enabled && !this._coreSettings.disableLensFlares) {
+        if (
+            lensFlareSystemSettings &&
+            lensFlareSystemSettings.enabled &&
+            !this._coreSettings.disableLensFlares
+        ) {
             this.disposeLensFlareSystem();
             this.createLensFlareSystem(lensFlareSystemSettings);
 
@@ -133,10 +159,14 @@ export class SceneSettingsService {
 
             const lensFlarePromises = [];
             let index = 0;
-            lensFlareSystemSettings.lensFlares.forEach((flareSetting: LensFlareSettings) => {
-                lensFlarePromises.push(this.addFlareToLenseFlareSystem(flareSetting, index));
-                index++;
-            });
+            lensFlareSystemSettings.lensFlares.forEach(
+                (flareSetting: LensFlareSettings) => {
+                    lensFlarePromises.push(
+                        this.addFlareToLenseFlareSystem(flareSetting, index)
+                    );
+                    index++;
+                }
+            );
             await Promise.all(lensFlarePromises);
         } else {
             this.disposeLensFlareSystem();
@@ -155,49 +185,66 @@ export class SceneSettingsService {
         }
     }
 
-    public createLensFlareSystem(lensFlareSystemSettings: LensFlareSystemSettings) {
+    public createLensFlareSystem(
+        lensFlareSystemSettings: LensFlareSystemSettings
+    ) {
         const lightEmitterPosition = new Vector3(
             lensFlareSystemSettings.lightEmitterPosition.x,
             lensFlareSystemSettings.lightEmitterPosition.y,
-            lensFlareSystemSettings.lightEmitterPosition.z,
+            lensFlareSystemSettings.lightEmitterPosition.z
         );
 
-        this._lenseFlareSystemEmitter = new PointLight('lensFlareSystemEmitter', lightEmitterPosition, this._scene);
+        this._lenseFlareSystemEmitter = new PointLight(
+            'lensFlareSystemEmitter',
+            lightEmitterPosition,
+            this._scene
+        );
         this._lenseFlareSystemEmitter.intensity = 0;
         this._lenseFlareSystemEmitter.shadowEnabled = false;
-        this._lenseFlareSystemEmitter['lensFlareSystemIntensity'] = lensFlareSystemSettings.intensity;
+        this._lenseFlareSystemEmitter['lensFlareSystemIntensity'] =
+            lensFlareSystemSettings.intensity;
         this._lenseFlareSystemEmitter.inspectableCustomProperties = [
             {
                 label: 'Lens Flare Intensity',
                 propertyName: 'lensFlareSystemIntensity',
                 type: InspectableType.Slider,
                 min: 0,
-                max: 4,
-            },
+                max: 4
+            }
         ];
 
         this._lenseFlareSystem = new MVLensFlareSystem(
             'lensFlareSystem',
             this._lenseFlareSystemEmitter,
             this._scene,
-            lensFlareSystemSettings.intensity,
+            lensFlareSystemSettings.intensity
         );
         this.lensFlareSystemEnabled = true;
     }
 
-    public async addFlareToLenseFlareSystem(flareSetting: LensFlareSettings, index: number) {
-        const lensFlareColor = new Color3(flareSetting.color.r, flareSetting.color.g, flareSetting.color.b);
-        const imgUrl = this._coreSettings.assetsBaseUrl + flareSetting.textureUrl;
+    public async addFlareToLenseFlareSystem(
+        flareSetting: LensFlareSettings,
+        index: number
+    ) {
+        const lensFlareColor = new Color3(
+            flareSetting.color.r,
+            flareSetting.color.g,
+            flareSetting.color.b
+        );
+        const imgUrl =
+            this._coreSettings.assetsBaseUrl + flareSetting.textureUrl;
 
         const lensFlare = new LensFlare(
             flareSetting.size,
             flareSetting.position,
             lensFlareColor,
             imgUrl,
-            this._lenseFlareSystem,
+            this._lenseFlareSystem
         );
 
-        lensFlare['flareIntensity'] = flareSetting.intensity ? flareSetting.intensity : 1;
+        lensFlare['flareIntensity'] = flareSetting.intensity
+            ? flareSetting.intensity
+            : 1;
 
         const lensFlareHelperNode = new TransformNode(`flare_${index}`);
         lensFlareHelperNode['lensFlare'] = lensFlare;
@@ -210,23 +257,23 @@ export class SceneSettingsService {
             {
                 label: 'Flare Intensity',
                 propertyName: 'flareIntensity',
-                type: InspectableType.Slider,
+                type: InspectableType.Slider
             },
             {
                 label: 'Flare Size',
                 propertyName: 'flareSize',
-                type: InspectableType.Slider,
+                type: InspectableType.Slider
             },
             {
                 label: 'Flare Position',
                 propertyName: 'flarePosition',
-                type: InspectableType.Slider,
+                type: InspectableType.Slider
             },
             {
                 label: 'Flare Color',
                 propertyName: 'flareColor',
-                type: InspectableType.Color3,
-            },
+                type: InspectableType.Color3
+            }
         ];
 
         lensFlareHelperNode.parent = this._lenseFlareSystemEmitter;
@@ -238,59 +285,82 @@ export class SceneSettingsService {
 
     public toggleLensFlareSystem() {
         if (this._lenseFlareSystem) {
-            this._lenseFlareSystem.isEnabled = !this._lenseFlareSystem.isEnabled;
+            this._lenseFlareSystem.isEnabled =
+                !this._lenseFlareSystem.isEnabled;
         }
     }
 
     public async setupEnvironmentTextures(
         entity: MVEnvironmentEntity,
-        environmentConfig: MVEnvironmentConfig,
+        environmentConfig: MVEnvironmentConfig
     ): Promise<void> {
         if (entity !== this._activeEnvironmentEntity) {
             // Remove previous environment textures and load all new ones after switching environments
 
-            const loadEnvironmentTexturePromises: Promise<BaseTexture | null>[] = [];
+            const loadEnvironmentTexturePromises: Promise<BaseTexture | null>[] =
+                [];
             const environmentTextureUrls: string[] = [];
             if (entity.environmentTextures.length == 0) {
-                for (const [configId, config] of Object.entries(entity.mv_environmentConfigs)) {
+                for (const [configId, config] of Object.entries(
+                    entity.mv_environmentConfigs
+                )) {
                     const environmentTextureConfig = config.environmentTexture;
                     if (
                         configId !== 'undefined' &&
                         environmentTextureConfig &&
-                        !environmentTextureUrls.includes(environmentTextureConfig.name)
+                        !environmentTextureUrls.includes(
+                            environmentTextureConfig.name
+                        )
                     ) {
-                        environmentTextureUrls.push(environmentTextureConfig.name);
-                        loadEnvironmentTexturePromises.push(this.loadEnvironmentTexture(entity, config));
+                        environmentTextureUrls.push(
+                            environmentTextureConfig.name
+                        );
+                        loadEnvironmentTexturePromises.push(
+                            this.loadEnvironmentTexture(entity, config)
+                        );
                     }
                 }
-                entity.environmentTextures = await Promise.all(loadEnvironmentTexturePromises) as any;
+                entity.environmentTextures = (await Promise.all(
+                    loadEnvironmentTexturePromises
+                )) as any;
             }
         }
 
         const environmentTexture = entity.environmentTextures.find((t) => {
             return t.name == environmentConfig.environmentTexture?.name;
         });
-        if (!environmentTexture) return
+        if (!environmentTexture) return;
 
         this._scene.environmentTexture = environmentTexture;
     }
 
-    public async loadEnvironmentTexture(entity: MVEnvironmentEntity, environmentConfig: MVEnvironmentConfig): Promise<BaseTexture | null> {
+    public async loadEnvironmentTexture(
+        entity: MVEnvironmentEntity,
+        environmentConfig: MVEnvironmentConfig
+    ): Promise<BaseTexture | null> {
         if (!environmentConfig.environmentTexture) {
             return null;
         }
-        const textureBaseUrl = entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.texturesUrlRelative;
-        const texture: BaseTexture | null = await this._textureService.createOrGetTextureFromConfig(
-            environmentConfig.environmentTexture,
-            textureBaseUrl,
-        );
+        const textureBaseUrl =
+            entity.entityConfig.entityConfigBaseUrl +
+            entity.entityConfig.texturesUrlRelative;
+        const texture: BaseTexture | null =
+            await this._textureService.createOrGetTextureFromConfig(
+                environmentConfig.environmentTexture,
+                textureBaseUrl
+            );
         (texture as any)['mv_isEnvironmentTexture'] = true;
+        (texture as any).setReflectionTextureMatrix(
+            Matrix.RotationY(
+                (environmentConfig.environmentTexture as any).rotationY
+            )
+        );
         return texture;
     }
 
     public async setupBackgroundImage(
         entity: MVEnvironmentEntity,
-        environmentConfig: MVEnvironmentConfig,
+        environmentConfig: MVEnvironmentConfig
     ): Promise<void> {
         // TODO preload int and ext backgrounds
 
@@ -304,8 +374,9 @@ export class SceneSettingsService {
         this.removeBackgroundImage();
         if (nextBackgroundImageUrl) {
             this._backdropImageLayer = await this.loadBackgroundImage(
-                entity.entityConfig.entityConfigBaseUrl + entity.entityConfig.texturesUrlRelative,
-                nextBackgroundImageUrl,
+                entity.entityConfig.entityConfigBaseUrl +
+                    entity.entityConfig.texturesUrlRelative,
+                nextBackgroundImageUrl
             );
         }
     }
@@ -328,9 +399,16 @@ export class SceneSettingsService {
      * @param baseUrl -
      * @param relativeTextureUrl -
      */
-    public loadBackgroundImage(baseUrl: string, relativeTextureUrl: string): Promise<Layer> {
+    public loadBackgroundImage(
+        baseUrl: string,
+        relativeTextureUrl: string
+    ): Promise<Layer> {
         return new Promise((resolve: any, reject: any) => {
-            const backdrop = new Layer('backdrop_' + relativeTextureUrl, baseUrl + relativeTextureUrl, this._scene);
+            const backdrop = new Layer(
+                'backdrop_' + relativeTextureUrl,
+                baseUrl + relativeTextureUrl,
+                this._scene
+            );
             (backdrop.texture as Texture).onLoadObservable.addOnce(() => {
                 backdrop.name = relativeTextureUrl;
                 backdrop.isBackground = true;
@@ -358,7 +436,11 @@ export class SceneSettingsService {
     }
 
     public initRenderPipeline() {
-        this._renderPipeline = new DefaultRenderingPipeline('DefaultRenderingPipeline', true, this._scene);
+        this._renderPipeline = new DefaultRenderingPipeline(
+            'DefaultRenderingPipeline',
+            true,
+            this._scene
+        );
         this._renderPipeline.glowLayerEnabled = true;
     }
 
