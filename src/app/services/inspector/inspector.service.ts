@@ -14,7 +14,6 @@ import {
     Texture,
     Tools
 } from 'babylonjs';
-import { Inspector } from 'babylonjs-inspector';
 import { NodeEditor } from 'babylonjs-node-editor';
 import { Core, MVCamera, MVMaterial } from 'mv-core';
 import { Subject, take } from 'rxjs';
@@ -38,7 +37,6 @@ export class InspectorService {
     private _core: Core;
     private _projectSettings: ProjectSettings;
     private _nodeEditorStylesheetAddedToDocument = false;
-    private debugLayer: MVDebugLayer;
     public isInspectorOpen = false;
     public _fileNameDialogRef: MatDialogRef<FileNameDialogComponent>;
 
@@ -76,7 +74,6 @@ export class InspectorService {
     openInspector(scene: Scene, rootElement: HTMLElement) {
         this.isInspectorOpen = true;
         this.scene = scene;
-        this.debugLayer = this.scene.debugLayer as any as MVDebugLayer;
         this.scene.debugLayer.show({
             globalRoot: rootElement,
             explorerExtensibility: [
@@ -110,7 +107,7 @@ export class InspectorService {
                                 }
                                 this.toggleInspector(scene, rootElement);
                                 this.toggleInspector(scene, rootElement);
-                                this.debugLayer.select(material);
+                                this.scene.debugLayer.select(material);
                             }
                         },
                         {
@@ -118,7 +115,7 @@ export class InspectorService {
                             action: (material) => {
                                 this.toggleInspector(scene, rootElement);
                                 this.toggleInspector(scene, rootElement);
-                                this.debugLayer.select(material);
+                                this.scene.debugLayer.select(material);
 
                                 this._fileNameDialogRef = this.dialog.open(
                                     FileNameDialogComponent,
@@ -264,272 +261,328 @@ export class InspectorService {
                 }
             ]
         });
-        this.scene.debugLayer.onPropertyChangedObservable.add(
-            (result: { object: any; property: string; value: any }) => {
-                const isMVCamera =
-                    result.object.getClassName() == 'ArcRotateCamera' &&
-                    result.object.isMVCamera;
-                const isTexture = result.object
-                    .getClassName()
-                    .toLowerCase()
-                    .includes('texture');
-                const isLightmapTexture =
-                    isTexture && result.object.isLightmapTexture;
-                const isMVNodeMaterial = result.object['isMVNodeMaterial'];
-                const isLensFlareSystemEmitter =
-                    result.object.name == 'lensFlareSystemEmitter';
-                const isFlareHelper = result.object['lensFlare'];
+        if (false && this.scene.debugLayer.onPropertyChangedObservable) {
+            this.scene.debugLayer.onPropertyChangedObservable.add(
+                (result: { object: any; property: string; value: any }) => {
+                    const isMVCamera =
+                        result.object.getClassName() == 'ArcRotateCamera' &&
+                        result.object.isMVCamera;
+                    const isTexture = result.object
+                        .getClassName()
+                        .toLowerCase()
+                        .includes('texture');
+                    const isLightmapTexture =
+                        isTexture && result.object.isLightmapTexture;
+                    const isMVNodeMaterial = result.object['isMVNodeMaterial'];
+                    const isLensFlareSystemEmitter =
+                        result.object.name == 'lensFlareSystemEmitter';
+                    const isFlareHelper = result.object['lensFlare'];
 
-                if (isMVCamera) {
-                    const mvCamera = result.object as MVCamera;
-                    if (result.property == 'orbitBehaviourEnabled') {
-                        if (result.value) {
-                            mvCamera.unlockRotation();
-                        } else {
-                            mvCamera.lockRotation();
+                    if (isMVCamera) {
+                        const mvCamera = result.object as MVCamera;
+                        if (result.property == 'orbitBehaviourEnabled') {
+                            if (result.value) {
+                                mvCamera.unlockRotation();
+                            } else {
+                                mvCamera.lockRotation();
+                            }
+                        } else if (result.property == 'zoomBehaviourEnabled') {
+                            if (result.value) {
+                                mvCamera.unlockZoom();
+                            } else {
+                                mvCamera.lockZoom();
+                            }
+                        } else if (
+                            result.property == 'lowerAlphaLimitDegrees'
+                        ) {
+                            mvCamera.lowerAlphaLimit = Tools.ToRadians(
+                                result.value
+                            );
+                        } else if (
+                            result.property == 'upperAlphaLimitDegrees'
+                        ) {
+                            mvCamera.upperAlphaLimit = Tools.ToRadians(
+                                result.value
+                            );
+                        } else if (result.property == 'lowerAlphaLimit') {
+                            mvCamera.lowerAlphaLimitDegrees = Tools.ToDegrees(
+                                result.value
+                            );
+                        } else if (result.property == 'upperAlphaLimit') {
+                            mvCamera.upperAlphaLimitDegrees = Tools.ToDegrees(
+                                result.value
+                            );
                         }
-                    } else if (result.property == 'zoomBehaviourEnabled') {
-                        if (result.value) {
-                            mvCamera.unlockZoom();
-                        } else {
-                            mvCamera.lockZoom();
-                        }
-                    } else if (result.property == 'lowerAlphaLimitDegrees') {
-                        mvCamera.lowerAlphaLimit = Tools.ToRadians(
-                            result.value
-                        );
-                    } else if (result.property == 'upperAlphaLimitDegrees') {
-                        mvCamera.upperAlphaLimit = Tools.ToRadians(
-                            result.value
-                        );
-                    } else if (result.property == 'lowerAlphaLimit') {
-                        mvCamera.lowerAlphaLimitDegrees = Tools.ToDegrees(
-                            result.value
-                        );
-                    } else if (result.property == 'upperAlphaLimit') {
-                        mvCamera.upperAlphaLimitDegrees = Tools.ToDegrees(
-                            result.value
-                        );
-                    }
 
-                    return;
-                }
-
-                if (result.object.isMVMaterial) {
-                    const updatedMaterial: MVMaterial = result.object;
-
-                    let affectedMaterials: Material[] =
-                        this.materialService.getParentAndAffectedMaterials(
-                            updatedMaterial
-                        ).affectedMaterials;
-                    affectedMaterials.forEach(
-                        (material) => (material[result.property] = result.value)
-                    );
-
-                    // necessary for babylon version < 5.0.0-alpha.24 because of missing trashcan button to delete textures from materials
-                    if (
-                        result.property.startsWith('delete') &&
-                        result.property.endsWith('Texture')
-                    ) {
-                        let textureType = result.property.split('delete')[1];
-                        textureType =
-                            textureType.charAt(0).toLowerCase() +
-                            textureType.slice(1); // to lower case
-                        updatedMaterial[textureType] = null;
-                        affectedMaterials.forEach(
-                            (material) => (material[textureType] = null)
-                        );
-
-                        setTimeout(() => {
-                            updatedMaterial[result.property] = false;
-                        }, 700);
-                    }
-                }
-
-                if (isLightmapTexture) {
-                    if (result.property == 'level') {
-                        this.materialService.gradeLightmapTextures(
-                            result.value
-                        );
-                    }
-                }
-
-                if (isMVNodeMaterial) {
-                    const nodeMaterial = result.object as NodeMaterial;
-                    const pbrMetallicRoughnessBlock =
-                        nodeMaterial.getBlockByName(
-                            'PBRMetallicRoughness'
-                        ) as PBRMetallicRoughnessBlock;
-                    if (result.property == 'mv_environmentIntensity') {
-                        pbrMetallicRoughnessBlock.environmentIntensity =
-                            result.value;
-                    }
-
-                    if (result.property == 'mv_directIntensity') {
-                        pbrMetallicRoughnessBlock.directIntensity =
-                            result.value;
-                    }
-
-                    if (result.property == 'mv_specularIntensity') {
-                        pbrMetallicRoughnessBlock.specularIntensity =
-                            result.value;
-                    }
-
-                    if (result.property == 'mv_unlit') {
-                        pbrMetallicRoughnessBlock.unlit = result.value;
-                    }
-
-                    if (result.property == '_metallicF0Factor') {
-                        pbrMetallicRoughnessBlock['_metallicF0Factor'] =
-                            result.value;
-                    }
-
-                    nodeMaterial.build();
-                }
-
-                if (isLensFlareSystemEmitter) {
-                    if (result.property == 'lensFlareSystemIntensity') {
-                        this._core.Environment.updateLensFlareIntensity(
-                            result.value
-                        );
-                    }
-                }
-
-                if (isFlareHelper) {
-                    const lensFlare: LensFlare = result.object['lensFlare'];
-
-                    if (lensFlare) {
-                        if (result.property == 'flareIntensity') {
-                            lensFlare['flareIntensity'] = result.value;
-                        }
-                        if (result.property == 'flarePosition') {
-                            lensFlare['position'] = result.value;
-                        }
-                        if (result.property == 'flareColor') {
-                            lensFlare['color'] = result.value;
-                        }
-                        if (result.property == 'flareSize') {
-                            lensFlare['size'] = result.value;
-                        }
-                    }
-                }
-            }
-        );
-        if (this.debugLayer.getInspectorMaterialTextureChangeEvent) {
-            const inspectorMaterialTextureChangeEvent =
-                this.debugLayer.getInspectorMaterialTextureChangeEvent();
-            inspectorMaterialTextureChangeEvent?.subscribe(
-                async (data: { file: File; material: any; props: any }) => {
-                    // Handle Material texture event
-                    const file = data.file;
-                    const material = data.material;
-                    let absoluteTextureUrl = (file as any).path.replace(
-                        /\\/g,
-                        '/'
-                    ); // necessary for windows file system
-                    const baseProjectUrl = this._projectSettings.baseProjectUrl
-                        .replace(/\\/g, '/')
-                        .replace('file://', '');
-
-                    if (!absoluteTextureUrl.includes(baseProjectUrl)) {
-                        this.notifierService.notify(
-                            'error',
-                            'Please select a texture within your project directory.'
-                        );
                         return;
                     }
 
-                    let relativeTexturePath = absoluteTextureUrl.replace(
-                        baseProjectUrl,
-                        ''
-                    );
-                    relativeTexturePath = relativeTexturePath.replace(
-                        this.dataService.getActiveEntity().entityConfig
-                            .texturesUrlRelative,
-                        ''
-                    );
-                    if (!this.dataService.allowUppercase) {
-                        if (this.fileAccessService.hasUpperCase(file.name)) {
-                            const errorMessage = `${relativeTexturePath} contains characters with capital letters. This can cause errors. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
+                    if (result.object.isMVMaterial) {
+                        const updatedMaterial: MVMaterial = result.object;
+
+                        let affectedMaterials: Material[] =
+                            this.materialService.getParentAndAffectedMaterials(
+                                updatedMaterial
+                            ).affectedMaterials;
+                        affectedMaterials.forEach(
+                            (material) =>
+                                (material[result.property] = result.value)
+                        );
+
+                        // necessary for babylon version < 5.0.0-alpha.24 because of missing trashcan button to delete textures from materials
+                        if (
+                            result.property.startsWith('delete') &&
+                            result.property.endsWith('Texture')
+                        ) {
+                            let textureType =
+                                result.property.split('delete')[1];
+                            textureType =
+                                textureType.charAt(0).toLowerCase() +
+                                textureType.slice(1); // to lower case
+                            updatedMaterial[textureType] = null;
+                            affectedMaterials.forEach(
+                                (material) => (material[textureType] = null)
+                            );
+
+                            setTimeout(() => {
+                                updatedMaterial[result.property] = false;
+                            }, 700);
+                        }
+                    }
+
+                    if (isLightmapTexture) {
+                        if (result.property == 'level') {
+                            this.materialService.gradeLightmapTextures(
+                                result.value
+                            );
+                        }
+                    }
+
+                    if (isMVNodeMaterial) {
+                        const nodeMaterial = result.object as NodeMaterial;
+                        const pbrMetallicRoughnessBlock =
+                            nodeMaterial.getBlockByName(
+                                'PBRMetallicRoughness'
+                            ) as PBRMetallicRoughnessBlock;
+                        if (result.property == 'mv_environmentIntensity') {
+                            pbrMetallicRoughnessBlock.environmentIntensity =
+                                result.value;
+                        }
+
+                        if (result.property == 'mv_directIntensity') {
+                            pbrMetallicRoughnessBlock.directIntensity =
+                                result.value;
+                        }
+
+                        if (result.property == 'mv_specularIntensity') {
+                            pbrMetallicRoughnessBlock.specularIntensity =
+                                result.value;
+                        }
+
+                        if (result.property == 'mv_unlit') {
+                            pbrMetallicRoughnessBlock.unlit = result.value;
+                        }
+
+                        if (result.property == '_metallicF0Factor') {
+                            pbrMetallicRoughnessBlock['_metallicF0Factor'] =
+                                result.value;
+                        }
+
+                        nodeMaterial.build();
+                    }
+
+                    if (isLensFlareSystemEmitter) {
+                        if (result.property == 'lensFlareSystemIntensity') {
+                            this._core.Environment.updateLensFlareIntensity(
+                                result.value
+                            );
+                        }
+                    }
+
+                    if (isFlareHelper) {
+                        const lensFlare: LensFlare = result.object['lensFlare'];
+
+                        if (lensFlare) {
+                            if (result.property == 'flareIntensity') {
+                                lensFlare['flareIntensity'] = result.value;
+                            }
+                            if (result.property == 'flarePosition') {
+                                lensFlare['position'] = result.value;
+                            }
+                            if (result.property == 'flareColor') {
+                                lensFlare['color'] = result.value;
+                            }
+                            if (result.property == 'flareSize') {
+                                lensFlare['size'] = result.value;
+                            }
+                        }
+                    }
+                }
+            );
+        }
+
+        if (true) {
+            const inspectorMaterialTextureChangeEvent = new Subject<{
+                file: File;
+                material: MVMaterial;
+                propertyName: string;
+            }>();
+            (window as any)['textureCallback'] =
+                inspectorMaterialTextureChangeEvent;
+
+            (window as any)['textureCallback']
+                ?.asObservable()
+                .subscribe(
+                    async (data: { file: File; material: any; props: any }) => {
+                        // Handle Material texture event
+                        const file = data.file;
+                        const material = data.material;
+
+                        const paths = (window as any).electronAPI.findFiles(
+                            file.name,
+                            [
+                                this._projectSettings.baseProjectUrl.replace(
+                                    'file://',
+                                    ''
+                                ) + '/materials',
+                                this._projectSettings.baseProjectUrl.replace(
+                                    'file://',
+                                    ''
+                                ) + '/textures',
+                                this._projectSettings.baseProjectUrl.replace(
+                                    'file://',
+                                    ''
+                                ) + '/environments'
+                            ]
+                        );
+
+                        if (paths.length > 1) {
+                            this.notifierService.notify(
+                                'error',
+                                `Multiple files with the name ${file.name} found in your project. Please make sure all your files have unique names.`
+                            );
+                            return;
+                        }
+
+                        let absoluteTextureUrl = paths[0].replace(/\\/g, '/'); // necessary for windows file system
+                        const baseProjectUrl =
+                            this._projectSettings.baseProjectUrl
+                                .replace(/\\/g, '/')
+                                .replace('file://', '');
+
+                        if (!absoluteTextureUrl.includes(baseProjectUrl)) {
+                            this.notifierService.notify(
+                                'error',
+                                'Please select a texture within your project directory.'
+                            );
+                            return;
+                        }
+
+                        let relativeTexturePath = absoluteTextureUrl.replace(
+                            baseProjectUrl,
+                            ''
+                        );
+                        relativeTexturePath = relativeTexturePath.replace(
+                            this.dataService.getActiveEntity().entityConfig
+                                .texturesUrlRelative,
+                            ''
+                        );
+                        if (!this.dataService.allowUppercase) {
+                            if (
+                                this.fileAccessService.hasUpperCase(file.name)
+                            ) {
+                                const errorMessage = `${relativeTexturePath} contains characters with capital letters. This can cause errors. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
+                                this.notifierService.notify(
+                                    'error',
+                                    errorMessage
+                                );
+                                console.warn(errorMessage);
+                                return;
+                            }
+                        }
+                        if (
+                            this.fileAccessService.hasInvalidCharacters(
+                                file.name
+                            )
+                        ) {
+                            const errorMessage = `${relativeTexturePath} includes forbidden characters. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
                             this.notifierService.notify('error', errorMessage);
                             console.warn(errorMessage);
                             return;
                         }
-                    }
-                    if (
-                        this.fileAccessService.hasInvalidCharacters(file.name)
-                    ) {
-                        const errorMessage = `${relativeTexturePath} includes forbidden characters. Only "a-z","0-9","-","_" are allowed. Please rename the file before you import it!`;
-                        this.notifierService.notify('error', errorMessage);
-                        console.warn(errorMessage);
-                        return;
-                    }
 
-                    const materialName = material.name;
-                    const textureBasePath =
-                        baseProjectUrl +
-                        this._projectSettings.entityConfigFile
-                            .texturesUrlRelative;
+                        const materialName = material.name;
+                        const textureBasePath =
+                            baseProjectUrl +
+                            this._projectSettings.entityConfigFile
+                                .texturesUrlRelative;
 
-                    let textureType = data.props.propertyName
-                        ? data.props.propertyName
-                        : data.props.label;
+                        let textureType = data.props.propertyName
+                            ? data.props.propertyName
+                            : data.props.label;
 
-                    if (textureType.toLowerCase() == 'detailmap') {
-                        textureType = 'detailMap';
-                    }
+                        if (textureType.toLowerCase() == 'detailmap') {
+                            textureType = 'detailMap';
+                        }
 
-                    const parentAndAffectedMaterials =
-                        this.materialService.getParentAndAffectedMaterials(
-                            material
+                        const parentAndAffectedMaterials =
+                            this.materialService.getParentAndAffectedMaterials(
+                                material
+                            );
+                        const affectedMaterials =
+                            parentAndAffectedMaterials.affectedMaterials;
+                        const parentMaterial =
+                            parentAndAffectedMaterials.parentMaterial;
+
+                        const texture: Texture =
+                            await this.materialService.updateTextureOnMaterial(
+                                absoluteTextureUrl,
+                                relativeTexturePath,
+                                this._projectSettings.baseProjectUrl,
+                                parentMaterial.id,
+                                textureType,
+                                this.scene,
+                                parentMaterial,
+                                textureBasePath
+                            );
+
+                        if (
+                            textureType.includes('opacity') &&
+                            (file as any).path.includes('.jpg')
+                        ) {
+                            texture.getAlphaFromRGB = true;
+                        }
+
+                        texture.inspectableCustomProperties = [];
+                        texture.inspectableCustomProperties.push({
+                            label: 'Get Alpha from RBG',
+                            propertyName: 'getAlphaFromRGB',
+                            type: InspectableType.Checkbox
+                        });
+
+                        affectedMaterials.forEach(
+                            (affectedMaterial: Material) => {
+                                affectedMaterial[textureType] = texture;
+                            }
                         );
-                    const affectedMaterials =
-                        parentAndAffectedMaterials.affectedMaterials;
-                    const parentMaterial =
-                        parentAndAffectedMaterials.parentMaterial;
 
-                    const texture: Texture =
-                        await this.materialService.updateTextureOnMaterial(
-                            absoluteTextureUrl,
-                            relativeTexturePath,
-                            this._projectSettings.baseProjectUrl,
-                            parentMaterial.id,
-                            textureType,
-                            this.scene,
-                            parentMaterial,
-                            textureBasePath
+                        this.dataService.updateTexture$.next();
+
+                        this.notifierService.notify(
+                            'success',
+                            `Material: ${materialName} updated with new ${textureType}`
                         );
-
-                    if (
-                        textureType.includes('opacity') &&
-                        (file as any).path.includes('.jpg')
-                    ) {
-                        texture.getAlphaFromRGB = true;
                     }
-
-                    texture.inspectableCustomProperties = [];
-                    texture.inspectableCustomProperties.push({
-                        label: 'Get Alpha from RBG',
-                        propertyName: 'getAlphaFromRGB',
-                        type: InspectableType.Checkbox
-                    });
-
-                    affectedMaterials.forEach((affectedMaterial: Material) => {
-                        affectedMaterial[textureType] = texture;
-                    });
-
-                    this.dataService.updateTexture$.next();
-
-                    this.notifierService.notify(
-                        'success',
-                        `Material: ${materialName} updated with new ${textureType}`
-                    );
-                }
-            );
+                );
         }
-        if (this.debugLayer.getInspectorMaterialTextureRemovedEvent) {
-            const inspectorMaterialTextureRemovedEvent =
-                this.debugLayer.getInspectorMaterialTextureRemovedEvent();
+        return;
+        if (
+            (this.scene.debugLayer as any)
+                .getInspectorMaterialTextureRemovedEvent
+        ) {
+            const inspectorMaterialTextureRemovedEvent = (
+                this.scene.debugLayer as any
+            ).getInspectorMaterialTextureRemovedEvent();
             inspectorMaterialTextureRemovedEvent?.subscribe(
                 async (data: { material: any; textureType: string }) => {
                     const materialType = data.material.getClassName();
@@ -545,9 +598,10 @@ export class InspectorService {
                 }
             );
         }
-        if (this.debugLayer.getOpenNodeMaterialEditorEvent) {
-            const openNodeMaterialEditorEvent =
-                this.debugLayer.getOpenNodeMaterialEditorEvent();
+        if ((this.scene.debugLayer as any).getOpenNodeMaterialEditorEvent) {
+            const openNodeMaterialEditorEvent = (
+                this.scene.debugLayer as any
+            ).getOpenNodeMaterialEditorEvent();
             (openNodeMaterialEditorEvent as any)?.subscribe(
                 (nodeMaterial: NodeMaterial) => {
                     this.openNodeEditor(nodeMaterial);
@@ -555,9 +609,13 @@ export class InspectorService {
             );
         }
 
-        if (this.debugLayer.getInspectorEnvironmentTextureChangeEvent) {
-            const environmentTextureChangeEvent =
-                this.debugLayer.getInspectorEnvironmentTextureChangeEvent();
+        if (
+            (this.scene.debugLayer as any)
+                .getInspectorEnvironmentTextureChangeEvent
+        ) {
+            const environmentTextureChangeEvent = (
+                this.scene.debugLayer as any
+            ).getInspectorEnvironmentTextureChangeEvent();
             environmentTextureChangeEvent?.subscribe((data: { file: File }) => {
                 // Handle Material texture event
                 const baseProjectUrl = this._projectSettings.baseProjectUrl
@@ -659,7 +717,7 @@ class MVInspector {
     public openNodeMaterialEditorEvent$ =
         this._openNodeMaterialEditorCallback.asObservable();
 
-    public Inspector = Inspector;
+    public Inspector;
 
     constructor() {
         this.setTextureCallBack();
@@ -748,14 +806,19 @@ export class MVDebugLayer extends DebugLayer {
             embedMode: false,
             handleResize: true,
             enablePopup: true,
-            inspectorURL: '',
+            inspectorURL: 'assets/babylon.inspector.bundle.max.8.0.0.js',
             ...config
         };
 
         // @ts-ignore
-        this.BJSINSPECTOR = new MVInspector();
+        // this._scene.debugLayer.show();
         // @ts-ignore
-        this.BJSINSPECTOR.Inspector.Show(this._scene, userOptions);
+        this.BJSINSPECTOR = this._scene.inspector as any;
+
+        // // @ts-ignore
+        // this.BJSINSPECTOR = new MVInspector();
+        // // @ts-ignore
+        // this.BJSINSPECTOR.Inspector.Show(this._scene, userOptions);
     }
 
     /**

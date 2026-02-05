@@ -6,6 +6,7 @@
         "ng": "ng",
         "dev": "concurrently \"ng serve --port 4205\" \"wait-on http://localhost:4205 && electron . --serve\" ",
         "electron": "ng serve && electron .",
+        "electron:windows": "npm run build && electron-builder build --windows",
         "build": "ng build",
         "watch": "ng build --watch --configuration development",
         "test": "ng test"
@@ -61,6 +62,7 @@
         "@types/jasmine": "~5.1.0",
         "child_process": "^1.0.2",
         "electron": "^38.3.0",
+        "electron-builder": "^26.7.0",
         "eslint-config-prettier": "^10.1.8",
         "fs-extra": "^11.3.3",
         "jasmine-core": "~5.9.0",

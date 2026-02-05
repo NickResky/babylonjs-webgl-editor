@@ -1945,9 +1945,9 @@ export class EntityService {
 
     public async disposeUnusedMaterialsAndTextures(timeoutInMS: number) {
         await timeout(timeoutInMS);
-        const colorGradingTexture: BaseTexture =
-            this._sceneSettingsService.getRenderPipeline().imageProcessing
-                ?.colorGradingTexture;
+        const colorGradingTexture: BaseTexture = (
+            this._sceneSettingsService.getRenderPipeline() as any
+        ).imageProcessing?.colorGradingTexture;
         const backdropTexture =
             this._sceneSettingsService.getBackdropImageLayer()?.texture;
         const environmentTextures =

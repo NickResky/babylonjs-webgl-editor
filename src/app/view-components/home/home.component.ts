@@ -190,17 +190,21 @@ export class HomeComponent implements AfterViewInit {
         await this.cameraService.requestDefaultCameraShot();
 
         this.setupKeyPressEvents(this.core._canvas);
-        Object.defineProperty(this.scene, 'debugLayer', {
-            get: function (this: Scene) {
-                if (!this._debugLayer) {
-                    // @ts-ignore
-                    this._debugLayer = new MVDebugLayer(this);
-                }
-                return this._debugLayer;
-            },
-            enumerable: true,
-            configurable: true
-        });
+
+        DebugLayer.InspectorURL = 'babylon.inspector.bundle.max.8.0.0.js';
+        // this.scene.debugLayer.show();
+
+        // Object.defineProperty(this.scene, 'debugLayer', {
+        //     get: function (this: Scene) {
+        //         if (!this._debugLayer) {
+        //             // @ts-ignore
+        //             this._debugLayer = new MVDebugLayer(this);
+        //         }
+        //         return this._debugLayer;
+        //     },
+        //     enumerable: true,
+        //     configurable: true
+        // });
 
         this.inspectorService.openInspector(
             this.scene,

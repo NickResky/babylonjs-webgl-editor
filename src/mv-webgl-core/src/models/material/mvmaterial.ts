@@ -50,18 +50,51 @@ export class MVMaterial extends PBRCustomMaterial {
         if (useVCAO) {
             this.useVCAO = true;
             // VCAO Implementation. Reduce lighting intensity with VCAOs.
+            // this.Fragment_Custom_MetallicRoughness(
+            //     `
+            //     #ifdef VERTEXCOLOR
+                
+            //     float vc = pow(vColor.r, 1.0 / 2.2) * 2.0;
+            //     float ao = (0.5 * (1.0 - vc));
+            //     metallicRoughness.g *= ao;
+                
+
+            //     #endif
+
+            // `
+            // );
+
+        //     this.Fragment_Custom_Albedo(
+        //          `
+        //         #ifdef VERTEXCOLOR
+                
+        //         float vc = pow(vColor.r, 1.0 / 2.2) * 2.0;
+        //         float ao = 1.0 - (1.0 * (1.0 - vc));
+        //         surfaceAlbedo *= ao;
+                
+
+        //         #endif
+
+        //  `
+        //     )
+
+            this.Fragment_Before_Lights
+
+            // this.Fragment_Before_Lights(`
+            //     baseColor = vec4(.0, .0, .83, 1.);
+            // `);
             this.Fragment_Before_FragColor(
                 `
                 #ifdef VERTEXCOLOR
                 
-                float vc = pow(vColor.r, 1.0 / 2.2) * 2.0;
+                float vc = pow(vColor.r, 1.0 / 1.0) * 3.0;
                 float ao = 1.0 - (0.5 * (1.0 - vc));
                 finalColor.rgb *= ao;
-                
+                //finalColor.rgb = vec3(ao, ao, ao);
 
                 #endif
 
-        `
+         `
             );
             /**
              *  #ifdef VERTEXCOLOR

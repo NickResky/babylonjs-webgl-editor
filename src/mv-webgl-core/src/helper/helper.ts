@@ -12,7 +12,7 @@ import {
     PBRMaterial,
     Scene,
     Texture,
-    Vector3,
+    Vector3
 } from 'babylonjs';
 import { MVLogger } from '..';
 import { MVEntity, MVMaterialMapping } from '../models';
@@ -29,7 +29,7 @@ export const TEXTURE_TYPES = [
     'emissive',
     'opacity',
     'ambient',
-    'lightmap',
+    'lightmap'
 ];
 
 export const TEXTURE_PROPERTIES = [
@@ -42,7 +42,7 @@ export const TEXTURE_PROPERTIES = [
     'emissiveTexture',
     'opacityTexture',
     'ambientTexture',
-    'lightmapTexture',
+    'lightmapTexture'
 ];
 
 /**
@@ -104,7 +104,11 @@ export const jsonToTextureParams = async (params: {
     baseUrl: string;
     removeFromScene?: boolean;
 }): Promise<BaseTexture> => {
-    const texture = await jsonToTexture(params.json, params.scene, params.baseUrl);
+    const texture = await jsonToTexture(
+        params.json,
+        params.scene,
+        params.baseUrl
+    );
     if (params.removeFromScene) {
         // params.scene.removeTexture(texture);
     }
@@ -117,7 +121,11 @@ export const jsonToTextureParams = async (params: {
  * @param scene -
  * @param baseUrl -
  */
-export const jsonToTexture = async (json: TextureJSON, scene: Scene, baseUrl: string): Promise<BaseTexture> => {
+export const jsonToTexture = async (
+    json: TextureJSON,
+    scene: Scene,
+    baseUrl: string
+): Promise<BaseTexture> => {
     const fullUrl = baseUrl + json.url;
     // const allTextures: Texture[] = Object.values(scene['mv_textures']);
     const jsonTextureKey = getTextureKeyFromJson(json, baseUrl);
@@ -174,62 +182,69 @@ export const getTextureKeyFromUrl = (url: string, level?: number): string => {
     return `${url}_1_-1_0_0_${level}_false`;
 };
 
-export const createJsonToTexturePromise = (json: TextureJSON, scene: Scene, baseUrl: string) => {
-    return new Promise<BaseTexture>((resolve: CallableFunction, reject: CallableFunction) => {
-        const url = baseUrl + json.url;
-        // console.log("Creating texture " + json.url);
-        let texture: Texture;
-        try {
-            // texture = new Texture(url, scene);
-            texture = new Texture(url, scene, false, true, 2, null, () => {
+export const createJsonToTexturePromise = (
+    json: TextureJSON,
+    scene: Scene,
+    baseUrl: string
+) => {
+    return new Promise<BaseTexture>(
+        (resolve: CallableFunction, reject: CallableFunction) => {
+            const url = baseUrl + json.url;
+            // console.log("Creating texture " + json.url);
+            let texture: Texture;
+            try {
+                // texture = new Texture(url, scene);
+                texture = new Texture(url, scene, false, true, 2, null, () => {
+                    console.error('Texture not found: ' + url);
+                    return null;
+                });
+            } catch (error) {
                 console.error('Texture not found: ' + url);
                 return null;
+            }
+            const textureKey = getTextureKeyFromJson(json, baseUrl);
+            texture['mv_textureKey'] = textureKey;
+            scene['mv_cached_textures'][textureKey] = texture;
+            // scene.addTexture(texture);
+            texture.onLoadObservable.addOnce(() => {
+                texture['mv_isMaterialTexture'] = true;
+                texture.url = json.url;
+                texture.uOffset = json.uOffset;
+                texture.vOffset = json.vOffset;
+                texture.uScale = json.uScale;
+                texture.vScale = json.vScale;
+                texture.uRotationCenter = json.uRotationCenter;
+                texture.vRotationCenter = json.vRotationCenter;
+                texture.wRotationCenter = json.wRotationCenter;
+                // texture.isBlocking = json.isBlocking;
+                // texture.uniqueId = json.uniqueId;
+                texture.name = json.name;
+                texture.hasAlpha = json.hasAlpha;
+                texture.getAlphaFromRGB = json.getAlphaFromRGB;
+                texture.level = json.level;
+                texture.wrapU = json.wrapU;
+                texture.wrapV = json.wrapV;
+                texture.wrapR = json.wrapR;
+                texture.anisotropicFilteringLevel =
+                    json.anisotropicFilteringLevel;
+                (texture as any).isCube = json.isCube;
+                (texture as any).is3D = json.is3D;
+                (texture as any).is2DArray = json.is2DArray;
+                texture.gammaSpace = json.gammaSpace;
+                texture.invertZ = json.invertZ;
+                texture.lodLevelInAlpha = json.lodLevelInAlpha;
+                texture.lodGenerationOffset = json.lodGenerationOffset;
+                texture.lodGenerationScale = json.lodGenerationScale;
+                texture.linearSpecularLOD = json.linearSpecularLOD;
+                texture.isRenderTarget = json.isRenderTarget;
+                // texture.animations = json.animations;
+                texture._invertY = json.invertY;
+                texture.updateSamplingMode(json.samplingMode);
+                texture.coordinatesIndex = json.coordinatesIndex;
+                resolve(texture);
             });
-        } catch (error) {
-            console.error('Texture not found: ' + url);
-            return null;
         }
-        const textureKey = getTextureKeyFromJson(json, baseUrl);
-        texture['mv_textureKey'] = textureKey;
-        scene['mv_cached_textures'][textureKey] = texture;
-        // scene.addTexture(texture);
-        texture.onLoadObservable.addOnce(() => {
-            texture['mv_isMaterialTexture'] = true;
-            texture.url = json.url;
-            texture.uOffset = json.uOffset;
-            texture.vOffset = json.vOffset;
-            texture.uScale = json.uScale;
-            texture.vScale = json.vScale;
-            texture.uRotationCenter = json.uRotationCenter;
-            texture.vRotationCenter = json.vRotationCenter;
-            texture.wRotationCenter = json.wRotationCenter;
-            texture.isBlocking = json.isBlocking;
-            texture.uniqueId = json.uniqueId;
-            texture.name = json.name;
-            texture.hasAlpha = json.hasAlpha;
-            texture.getAlphaFromRGB = json.getAlphaFromRGB;
-            texture.level = json.level;
-            texture.wrapU = json.wrapU;
-            texture.wrapV = json.wrapV;
-            texture.wrapR = json.wrapR;
-            texture.anisotropicFilteringLevel = json.anisotropicFilteringLevel;
-            (texture as any).isCube = json.isCube;
-            (texture as any).is3D = json.is3D;
-            (texture as any).is2DArray = json.is2DArray;
-            texture.gammaSpace = json.gammaSpace;
-            texture.invertZ = json.invertZ;
-            texture.lodLevelInAlpha = json.lodLevelInAlpha;
-            texture.lodGenerationOffset = json.lodGenerationOffset;
-            texture.lodGenerationScale = json.lodGenerationScale;
-            texture.linearSpecularLOD = json.linearSpecularLOD;
-            texture.isRenderTarget = json.isRenderTarget;
-            // texture.animations = json.animations;
-            texture._invertY = json.invertY;
-            texture.updateSamplingMode(json.samplingMode);
-            texture.coordinatesIndex = json.coordinatesIndex;
-            resolve(texture);
-        });
-    });
+    );
 };
 
 /**
@@ -338,7 +353,15 @@ export const detectMobileDevice = (): any => {
     if (window.innerWidth < 1000) {
         return true;
     }
-    const toMatch = [/android/i, /webos/i, /iphone/i, /ipad/i, /ipod/i, /blackberry/i, /windows phone/i];
+    const toMatch = [
+        /android/i,
+        /webos/i,
+        /iphone/i,
+        /ipad/i,
+        /ipod/i,
+        /blackberry/i,
+        /windows phone/i
+    ];
     console.log(navigator.platform);
     return toMatch.some((toMatchItem: any) => {
         return navigator.userAgent.toLowerCase().match(toMatchItem);
@@ -371,10 +394,13 @@ export const removeLight = (light: Light, scene: Scene): Promise<void> => {
 };
 
 export const stringifyTextureJSON = (textureJson: TextureJSON): string => {
-    return Object.keys(textureJson).reduce((fullKey: string, property: string) => {
-        fullKey += `${property}_${textureJson[property]}_`;
-        return fullKey;
-    }, '');
+    return Object.keys(textureJson).reduce(
+        (fullKey: string, property: string) => {
+            fullKey += `${property}_${textureJson[property]}_`;
+            return fullKey;
+        },
+        ''
+    );
 };
 
 export interface AssetContainerResult {
@@ -385,7 +411,11 @@ export interface AssetContainerResult {
  * Removes a mesh from the scene
  * @param mesh - Mesh
  */
-export const disposeMesh = async (mesh: AbstractMesh, scene: Scene, entity: MVEntity): Promise<AbstractMesh> => {
+export const disposeMesh = async (
+    mesh: AbstractMesh,
+    scene: Scene,
+    entity: MVEntity
+): Promise<AbstractMesh> => {
     return new Promise<AbstractMesh>((resolve: CallableFunction) => {
         removeMesh(mesh, scene, entity);
         mesh.onDisposeObservable.addOnce(() => resolve(mesh));
@@ -397,7 +427,7 @@ export const disposeMaterial = async (
     material: Material,
     scene: Scene,
     disposeTextures: boolean,
-    lazyLoadingEnabled: boolean,
+    lazyLoadingEnabled: boolean
 ) => {
     return new Promise<Material>((resolve) => {
         // scene.removeMaterial(material);
@@ -406,7 +436,8 @@ export const disposeMaterial = async (
         });
         if (index !== -1 && index < scene.materials.length) {
             if (index !== scene.materials.length - 1) {
-                const lastMaterial = scene.materials[scene.materials.length - 1];
+                const lastMaterial =
+                    scene.materials[scene.materials.length - 1];
                 scene.materials[index] = lastMaterial;
                 lastMaterial._indexInSceneMaterialArray = index;
             }
@@ -454,7 +485,11 @@ export const disposeTexture = async (texture: BaseTexture, scene: Scene) => {
  * Removes meshes from the scene
  * @param meshes - Meshes
  */
-export const disposeMeshes = async (meshes: AbstractMesh[], scene: Scene, entity: MVEntity) => {
+export const disposeMeshes = async (
+    meshes: AbstractMesh[],
+    scene: Scene,
+    entity: MVEntity
+) => {
     // force sequential order of layer disposal is required to prevent side effects
     await meshes.reduce((previousPromise, nextMesh) => {
         return previousPromise.then(() => {
@@ -463,16 +498,25 @@ export const disposeMeshes = async (meshes: AbstractMesh[], scene: Scene, entity
     }, Promise.resolve());
 };
 
-export const removeMeshes = (meshes: AbstractMesh[], scene: Scene, entity: MVEntity) => {
+export const removeMeshes = (
+    meshes: AbstractMesh[],
+    scene: Scene,
+    entity: MVEntity
+) => {
     meshes.forEach((mesh) => {
         removeMesh(mesh, scene, entity);
     });
 };
 
-export const removeMesh = (mesh: AbstractMesh, scene: Scene, entity: MVEntity) => {
+export const removeMesh = (
+    mesh: AbstractMesh,
+    scene: Scene,
+    entity: MVEntity
+) => {
     const materialMappingId = mesh['originalMaterialName'];
     if (materialMappingId) {
-        const materialMapping: MVMaterialMapping = entity.getMaterialMapping(materialMappingId);
+        const materialMapping: MVMaterialMapping =
+            entity.getMaterialMapping(materialMappingId);
         if (materialMapping) {
             materialMapping.removeMesh(mesh);
         }
@@ -486,7 +530,12 @@ export const removeMesh = (mesh: AbstractMesh, scene: Scene, entity: MVEntity) =
     scene.removeMesh(mesh, false);
 };
 
-export const disposeLayer = async (layer: MVLayer, scene: Scene, entity: MVEntity, lazyLoadingEnabled: boolean) => {
+export const disposeLayer = async (
+    layer: MVLayer,
+    scene: Scene,
+    entity: MVEntity,
+    lazyLoadingEnabled: boolean
+) => {
     if (!lazyLoadingEnabled) {
         layer.disposeAssetContainers();
     }
@@ -520,7 +569,11 @@ export const disposeLayer = async (layer: MVLayer, scene: Scene, entity: MVEntit
     for (const materialId of Object.keys(materialsOfDisposedMeshes)) {
         const material: Material = materialsOfDisposedMeshes[materialId];
         const materialStillInUse = scene.meshes.find((m) => {
-            return material && m.material && material.uniqueId == m.material.uniqueId;
+            return (
+                material &&
+                m.material &&
+                material.uniqueId == m.material.uniqueId
+            );
         });
 
         if (material && !materialStillInUse) {
@@ -533,7 +586,8 @@ export const disposeLayer = async (layer: MVLayer, scene: Scene, entity: MVEntit
                 });
                 const detailMapTexture = material['detailMap']?.texture;
                 if (detailMapTexture) {
-                    texturesOfDisposedMaterials[detailMapTexture.uniqueId] = detailMapTexture;
+                    texturesOfDisposedMaterials[detailMapTexture.uniqueId] =
+                        detailMapTexture;
                 }
             }
             if (material['isMVMaterial']) {
@@ -564,13 +618,16 @@ const checkIfTextureIsUsed = (texture: BaseTexture, scene) => {
                 return false;
             });
             const detailMapTexture = material['detailMap']?.texture;
-            if (detailMapTexture && detailMapTexture.uniqueId == texture.uniqueId) {
+            if (
+                detailMapTexture &&
+                detailMapTexture.uniqueId == texture.uniqueId
+            ) {
                 return true;
             }
         }
         return false;
     }
-    return false
+    return false;
 };
 
 export const disposeUnusedMaterialsAndTextures = async (
@@ -578,13 +635,13 @@ export const disposeUnusedMaterialsAndTextures = async (
     colorGradingTexture: BaseTexture,
     backdropTexture: Texture,
     environmentTextures: BaseTexture[],
-    lazyLoadingEnabled: boolean,
+    lazyLoadingEnabled: boolean
 ) => {
     const registry = generateUsedMaterialAndTextureRegistry(
         scene,
         colorGradingTexture,
         backdropTexture,
-        environmentTextures,
+        environmentTextures
     );
 
     const textureIdsToDispose: string[] = [];
@@ -593,9 +650,12 @@ export const disposeUnusedMaterialsAndTextures = async (
     for (const texture of scene.textures) {
         if (texture.uniqueId == null || texture.uniqueId == undefined) continue;
         textureMap[texture.uniqueId.toString()] = texture;
-        const textureIsUsed = registry.usedTextures[texture.uniqueId] ? true : false;
+        const textureIsUsed = registry.usedTextures[texture.uniqueId]
+            ? true
+            : false;
         const isGlowLayerTexture =
-            texture.name.startsWith('GlowLayerBlur') || texture.name.startsWith('HighlightLayer');
+            texture.name.startsWith('GlowLayerBlur') ||
+            texture.name.startsWith('HighlightLayer');
         const isLensFlareTexture = texture['isLensFlareTexture'];
         if (!textureIsUsed && !isGlowLayerTexture && !isLensFlareTexture) {
             textureIdsToDispose.push(texture.uniqueId.toString());
@@ -623,8 +683,13 @@ export const disposeUnusedMaterialsAndTextures = async (
     const materialsMap = {};
     for (let material of scene.materials) {
         materialsMap[material.id] = material;
-        const materialIsUsed = registry.usedMaterials[material.uniqueId] ? true : false;
-        if ((material['isMVMaterial'] || material['isMVNodeMaterial']) && !materialIsUsed) {
+        const materialIsUsed = registry.usedMaterials[material.uniqueId]
+            ? true
+            : false;
+        if (
+            (material['isMVMaterial'] || material['isMVNodeMaterial']) &&
+            !materialIsUsed
+        ) {
             disposedMaterialIds.push(material.id);
         }
     }
@@ -638,7 +703,8 @@ export const disposeUnusedMaterialsAndTextures = async (
         });
         if (index !== -1 && index < scene.materials.length) {
             if (index !== scene.materials.length - 1) {
-                const lastMaterial = scene.materials[scene.materials.length - 1];
+                const lastMaterial =
+                    scene.materials[scene.materials.length - 1];
                 scene.materials[index] = lastMaterial;
                 lastMaterial._indexInSceneMaterialArray = index;
             }
@@ -647,7 +713,9 @@ export const disposeUnusedMaterialsAndTextures = async (
             scene.materials.pop();
         }
 
-        disposeMaterialPromises.push(disposeMaterial(material, scene, false, lazyLoadingEnabled));
+        disposeMaterialPromises.push(
+            disposeMaterial(material, scene, false, lazyLoadingEnabled)
+        );
     });
 
     await Promise.all(disposeMaterialPromises);
@@ -657,11 +725,11 @@ export const generateUsedMaterialAndTextureRegistry = (
     scene: Scene,
     colorGradingTexture: BaseTexture,
     backdropTexture: Texture,
-    environmentTextures: BaseTexture[],
+    environmentTextures: BaseTexture[]
 ): UsedMaterialAndTextureRegistry => {
     const registry: UsedMaterialAndTextureRegistry = {
         usedMaterials: {},
-        usedTextures: {},
+        usedTextures: {}
     };
     for (const mesh of scene.meshes) {
         if (mesh.material) {
@@ -678,13 +746,15 @@ export const generateUsedMaterialAndTextureRegistry = (
         if (material instanceof PBRMaterial) {
             const detailMapTexture = material['detailMap']?.texture;
             if (detailMapTexture) {
-                registry.usedTextures[detailMapTexture.uniqueId] = detailMapTexture;
+                registry.usedTextures[detailMapTexture.uniqueId] =
+                    detailMapTexture;
             }
         }
         if (!material['isMVVCAONodeMaterial'] && material['isMVNodeMaterial']) {
             (material as NodeMaterial).getTextureBlocks().forEach((block) => {
                 if (block.texture) {
-                    registry.usedTextures[block.texture.uniqueId] = block.texture;
+                    registry.usedTextures[block.texture.uniqueId] =
+                        block.texture;
                 }
             });
         }
@@ -692,17 +762,20 @@ export const generateUsedMaterialAndTextureRegistry = (
 
     environmentTextures.forEach((environmentTexture) => {
         if (environmentTexture.uniqueId) {
-            registry.usedTextures[environmentTexture.uniqueId] = environmentTexture;
+            registry.usedTextures[environmentTexture.uniqueId] =
+                environmentTexture;
         }
     });
 
     const environmentBRDFTexture = scene.environmentBRDFTexture;
     if (environmentBRDFTexture && environmentBRDFTexture.uniqueId) {
-        registry.usedTextures[environmentBRDFTexture.uniqueId] = environmentBRDFTexture;
+        registry.usedTextures[environmentBRDFTexture.uniqueId] =
+            environmentBRDFTexture;
     }
 
     if (colorGradingTexture && colorGradingTexture.uniqueId) {
-        registry.usedTextures[colorGradingTexture.uniqueId] = colorGradingTexture;
+        registry.usedTextures[colorGradingTexture.uniqueId] =
+            colorGradingTexture;
     }
 
     if (backdropTexture && colorGradingTexture.uniqueId) {
@@ -728,7 +801,10 @@ export const freezeMaterials = async (scene: Scene) => {
     }
     MVLogger.debug('Freezing materials');
     scene.materials.forEach((material) => {
-        if ((material['isMVMaterial'] || material['isMVNodeMaterial']) && !material.isFrozen) {
+        if (
+            (material['isMVMaterial'] || material['isMVNodeMaterial']) &&
+            !material.isFrozen
+        ) {
             material.freeze();
         }
     });
@@ -745,8 +821,11 @@ export const waitForSceneReady = async (scene: Scene) => {
 
     await sceneReadyPromise;
 
-    const waitForSceneReadyTimeInS = (Date.now() - waitForSceneReayStartTimeInMs) / 1000;
-    MVLogger.debug(`Wait for scene ready time in seconds: ${waitForSceneReadyTimeInS}`);
+    const waitForSceneReadyTimeInS =
+        (Date.now() - waitForSceneReayStartTimeInMs) / 1000;
+    MVLogger.debug(
+        `Wait for scene ready time in seconds: ${waitForSceneReadyTimeInS}`
+    );
 };
 
 export const rebuildMaterials = (scene: Scene) => {
@@ -759,7 +838,10 @@ export const rebuildMaterials = (scene: Scene) => {
 
 export const unfreezeMaterials = (scene: Scene) => {
     scene.materials.forEach((material) => {
-        if ((material['isMVMaterial'] || material['isMVNodeMaterial']) && material.isFrozen) {
+        if (
+            (material['isMVMaterial'] || material['isMVNodeMaterial']) &&
+            material.isFrozen
+        ) {
             material.unfreeze();
         }
     });
@@ -776,7 +858,7 @@ export const timeout = async (timeInMilliSeconds: number) => {
 export const isTransparentMaterial = (
     transparencyMode: number,
     alpha?: number,
-    opacityTexture?: BaseTexture,
+    opacityTexture?: BaseTexture
 ): boolean => {
     if (alpha && alpha < 1) {
         return true;
@@ -791,7 +873,10 @@ export const isTransparentMaterial = (
 
 export const isEmissiveMaterial = (materialJson: MVMaterialJSON): boolean => {
     const emissiveColor = materialJson.emissive;
-    return (emissiveColor && emissiveColor[0] !== 0 && emissiveColor[1] !== 0 && emissiveColor[2] !== 0) ||
+    return (emissiveColor &&
+        emissiveColor[0] !== 0 &&
+        emissiveColor[1] !== 0 &&
+        emissiveColor[2] !== 0) ||
         materialJson.emissiveTexture
         ? true
         : false;

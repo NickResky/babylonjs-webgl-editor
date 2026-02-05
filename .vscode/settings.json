@@ -25,5 +25,8 @@
     "tailwindCSS.includeLanguages": {
         "html": "html",
         "typescript": "html" // only needed if you use inline templates
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
     }
 }

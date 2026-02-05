@@ -2,6 +2,7 @@ import {
     BaseTexture,
     Color3,
     Color4,
+    Constants,
     DefaultRenderingPipeline,
     InspectableType,
     Layer,
@@ -11,6 +12,8 @@ import {
     Mesh,
     PointLight,
     Scene,
+    SSAORenderingPipeline,
+    SSRRenderingPipeline,
     Texture,
     TransformNode,
     Vector3
@@ -35,7 +38,9 @@ import { TextureService } from './texture.service';
  */
 @injectable()
 export class SceneSettingsService {
-    private _renderPipeline: DefaultRenderingPipeline;
+    private _renderPipeline?: DefaultRenderingPipeline;
+    private _ssaoPipeline: SSAORenderingPipeline;
+    private _ssrPipeline: SSRRenderingPipeline;
 
     private _activeEnvironmentEntity: MVEnvironmentEntity;
     private _backdropImageLayer: Layer;
@@ -435,6 +440,14 @@ export class SceneSettingsService {
         return this._renderPipeline;
     }
 
+    public getSSAORenderPipeline() {
+        return this._ssaoPipeline;
+    }
+
+    public getSSRRenderPipeline() {
+        return this._ssaoPipeline;
+    }
+
     public initRenderPipeline() {
         this._renderPipeline = new DefaultRenderingPipeline(
             'DefaultRenderingPipeline',
@@ -442,6 +455,25 @@ export class SceneSettingsService {
             this._scene
         );
         this._renderPipeline.glowLayerEnabled = true;
+        var ssaoRatio = {
+            ssaoRatio: 0.5, // Ratio of the SSAO post-process, in a lower resolution
+            combineRatio: 1.0 // Ratio of the combine post-process (combines the SSAO and the scene)
+        };
+
+        // this._ssaoPipeline = new SSAORenderingPipeline("ssao", this._scene, ssaoRatio);
+        // this._ssaoPipeline.fallOff = 0.000001;
+        // this._ssaoPipeline.area = 1;
+        // this._ssaoPipeline.radius = 0.0001;
+        // this._ssaoPipeline.totalStrength = 1.0;
+        // this._ssaoPipeline.base = 0.5;
+
+        // this._ssrPipeline = new SSRRenderingPipeline(
+        //     "ssr", // The name of the pipeline
+        //     this._scene, // The scene to which the pipeline belongs
+        //     [this._scene.activeCamera], // The list of cameras to attach the pipeline to
+        //     false, // Whether or not to use the geometry buffer renderer (default: false, use the pre-pass renderer)
+        //     Constants.TEXTURETYPE_UNSIGNED_BYTE, // The texture type used by the SSR effect (default: TEXTURETYPE_UNSIGNED_BYTE)
+        // );
     }
 
     public addMeshToGlowLayer(mesh: Mesh) {

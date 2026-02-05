@@ -304,8 +304,20 @@ export class MaterialService {
                     }
                 }
                 const ext = hasAlpha ? 'png' : 'jpg';
-                const texName = `${tex.name}.${ext}`;
-                const filePathRelative = path_relative + '/' + texName;
+                let texName = `${tex.name}.${ext}`;
+                if (tex.name.includes('.')) {
+                    texName = tex.name;
+                }
+                const filePathRelative = tex
+                    .getInternalTexture()
+                    .url.replace('file://', '')
+                    .replace(
+                        this.projectSettings.baseProjectUrl.replace(
+                            'file://',
+                            ''
+                        ),
+                        ''
+                    );
                 const filePath = outDir + '/' + filePathRelative;
                 console.log(' → Exporting texture:', texName);
 
@@ -351,6 +363,10 @@ export class MaterialService {
                     normalBlendMethod: material.detailMap.normalBlendMethod,
                     roughnessBlendLevel: material.detailMap.roughnessBlendLevel
                 };
+            }
+            if (material.clearCoat.isEnabled) {
+                materialSerialized['clearCoat'] =
+                    material.clearCoat.serialize();
             }
         }
         materialSerialized.name = fileName;

@@ -1,4 +1,4 @@
-import { AbstractMesh, AnimationGroup, ArcRotateCamera, Camera, Scene, Tools, Vector3 } from 'babylonjs';
+import { AbstractMesh, AnimationGroup, ArcRotateCamera, Camera, Constants, Scene, SSRRenderingPipeline, Tools, Vector3 } from 'babylonjs';
 import { inject, injectable } from 'inversify';
 import { Subject } from 'rxjs';
 import { SceneSettingsService } from '.';
@@ -278,6 +278,20 @@ export class CameraService {
      * Add camera to render pipeline
      */
     public addCameraToRenderPipeline(camera: Camera): void {
+
+        const ssaoPipeline = this._sceneSettingsService.getSSAORenderPipeline();
+        if (ssaoPipeline && !ssaoPipeline.cameras.includes(camera)) {
+            this._scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', camera);
+        }
+
+        // new SSRRenderingPipeline(
+        //     "ssr", // The name of the pipeline
+        //     this._scene, // The scene to which the pipeline belongs
+        //     [camera], // The list of cameras to attach the pipeline to
+        //     false, // Whether or not to use the geometry buffer renderer (default: false, use the pre-pass renderer)
+        //     Constants.TEXTURETYPE_UNSIGNED_BYTE, // The texture type used by the SSR effect (default: TEXTURETYPE_UNSIGNED_BYTE)
+        // );
+
         const renderPipeline = this._sceneSettingsService.getRenderPipeline();
         if (renderPipeline && !renderPipeline.cameras.includes(camera)) {
             renderPipeline.addCamera(camera);

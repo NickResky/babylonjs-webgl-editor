@@ -50,5 +50,35 @@ contextBridge.exposeInMainWorld('electronAPI', {
     fsUnlink: (path, callback) => fs.unlink(path, callback),
     fsRename: (path, newPath, callback) => fs.rename(path, newPath, callback),
     fsStatSync: (path) => fs.statSync(path),
-    fsChmodSync: (path, mode) => fs.chmodSync(path, mode)
+    fsChmodSync: (path, mode) => fs.chmodSync(path, mode),
+    findFiles: (filename, directories) => {
+        const matches = [];
+
+        function walk(dir) {
+            let entries;
+
+            try {
+                entries = fs.readdirSync(dir, { withFileTypes: true });
+            } catch (err) {
+                // skip directories we can't access
+                return;
+            }
+
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+
+                if (entry.isDirectory()) {
+                    walk(fullPath);
+                } else if (entry.isFile() && entry.name === filename) {
+                    matches.push(fullPath);
+                }
+            }
+        }
+
+        for (const dir of directories) {
+            walk(dir);
+        }
+
+        return matches;
+    }
 });

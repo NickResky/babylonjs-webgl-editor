@@ -177,7 +177,7 @@ export class MVSceneOptimizerService {
         const glowAndLensFlareTargetFrameRate = this._settings.antiAliasingSettings.fxTargetFrameRate;
         const renderPipeline = this._sceneSettingsService.getRenderPipeline();
 
-        if (isMobileDevice && averageFps < glowAndLensFlareTargetFrameRate) {
+        if (isMobileDevice && averageFps < glowAndLensFlareTargetFrameRate && renderPipeline) {
             renderPipeline.glowLayerEnabled = false;
             this._sceneSettingsService.disableLensFlareSystem();
         }
@@ -229,6 +229,8 @@ export class MVSceneOptimizerService {
                         MVLogger.debug(`Starting quality optimizer. (average FPS: ${fps})!`);
                         this._qualityOptimizer.start();
                     }
+
+                    if (!renderPipeline) return
 
                     if (fps < glowAndLensFlareTargetFrameRate) {
                         renderPipeline.glowLayerEnabled = false;
