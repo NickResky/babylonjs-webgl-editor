@@ -352,9 +352,9 @@ export class HomeComponent implements AfterViewInit {
     async saveMaterialsAndCreateAllocators() {
         console.log('saveMaterialsAndCreateAllocators');
         this.scene?.materials.forEach((m) => {
-            if (m.name.includes('.json')) return;
+            if (m.name.includes('.json') || m.name.includes('/')) return;
 
-            const path = `materials/suv/${m.name.replace('MI_GLTF_', '')}.json`;
+            const path = `materials/automotive/${m.name.replace('MI_GLTF_', '')}.json`;
             this.materialService.updateMaterial(
                 this._projectSettings.baseProjectUrl,
                 path,

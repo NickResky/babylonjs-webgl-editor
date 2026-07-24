@@ -273,12 +273,12 @@ export class MaterialService {
 
         if (material instanceof PBRMaterial) {
             // Collect from materials
-            if (material.name.includes('Wood')) {
-                debugger;
-            }
+            // if (material.name.includes('Wood')) {
+            //     debugger;
+            // }
             const textureSet = this.collectMaterialTextures(material);
 
-            const path_relative = 'materials/suv/textures';
+            const path_relative = 'materials/automotive/textures';
             const outDir = `${basePath.replace('file://', '')}`;
 
             for (const tex of textureSet) {
@@ -318,7 +318,8 @@ export class MaterialService {
                         ),
                         ''
                     );
-                const filePath = outDir + '/' + filePathRelative;
+
+                const filePath = outDir + '/' + path_relative + '/' + texName;
                 console.log(' → Exporting texture:', texName);
 
                 const mime: any = hasAlpha ? 'image/png' : 'image/jpeg';

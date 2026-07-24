@@ -504,6 +504,10 @@ export class ProductionExportService {
                 materialMappings.materialAllocators.map((p) => {
                     const materialPath = `${entityConfig.materialsUrlRelative}${p.mapping}`;
 
+                    if (materialPath.includes('.glb')) {
+                        return p; // skip this iteration
+                    }
+
                     let material = entityConfig.materials[materialPath];
                     if (
                         !material &&

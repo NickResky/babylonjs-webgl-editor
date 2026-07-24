@@ -926,10 +926,11 @@ export class EntityService {
                     this.setInspectableCustomProperties(m, layerPath, layer);
                     this.processOriginalMaterial(entity, m, layer);
                     layer.addMesh(m);
-                    // if (m.material) {s
-                    //     m.useVertexColors = false;
-                    //     this._scene.addMaterial(m.material);
-                    // }
+                    m.useVertexColors = false;
+                    if (m.material) {
+                        m.useVertexColors = false;
+                        // this._scene.addMaterial(m.material);
+                    }
                     this._scene.addMesh(m);
                 }
             }
@@ -1487,7 +1488,7 @@ export class EntityService {
                 entity.entityConfig.useVCAOForPBRMaterials &&
                 mesh['getVertexBuffer']
             ) {
-                mesh.useVertexColors = true;
+                mesh.useVertexColors = false;
                 const colorVertexBuffer = (mesh as Mesh).getVertexBuffer(
                     VertexBuffer.ColorKind
                 );
@@ -1679,10 +1680,10 @@ export class EntityService {
                     ) {
                         isTransparent = true;
                     }
-                    const useVertexColors =
-                        isNodeMaterial ||
-                        (entity.entityConfig.useVCAOForPBRMaterials &&
-                            !isTransparent);
+                    const useVertexColors = true;
+                    // isNodeMaterial ||
+                    // (entity.entityConfig.useVCAOForPBRMaterials &&
+                    //     !isTransparent);
                     mesh.useVertexColors = useVertexColors;
                     mesh['vertexColorInUse'] = useVertexColors;
 
