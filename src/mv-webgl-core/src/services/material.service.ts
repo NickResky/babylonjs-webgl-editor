@@ -1,6 +1,7 @@
 import {
     Scene,
     Material,
+    BaseTexture,
     NodeMaterial,
     Color3,
     InspectableType,
@@ -22,7 +23,8 @@ import {
     isEmissiveMaterial,
     isTransparentMaterial,
     jsonToTexture,
-    loadJson
+    loadJson,
+    TEXTURE_PROPERTIES
 } from '../helper';
 import { MVEntity } from '../models/entity/mv-entity';
 import { CoreSettings } from '../settings';
@@ -93,10 +95,21 @@ export class MaterialService {
             if (loadedMaterial) {
                 const pbrMaterial = loadedMaterial as PBRMaterial;
 
-                if (pbrMaterial instanceof PBRMaterial) {
+                if (false && pbrMaterial instanceof PBRMaterial) {
                     try {
                         const materialConfig =
                             pbrMaterial.serialize() as MVMaterialJSON;
+                        const materialConfigWithoutTextures: any = {
+                            ...materialConfig
+                        };
+                        for (const textureProperty of TEXTURE_PROPERTIES) {
+                            delete materialConfigWithoutTextures[
+                                textureProperty
+                            ];
+                        }
+                        delete materialConfigWithoutTextures.detailMap;
+                        delete materialConfigWithoutTextures.environmentBRDFTexture;
+
                         const VCAOIntensity =
                             entity.entityConfig.VCAOIntensity !== undefined
                                 ? entity.entityConfig.VCAOIntensity
@@ -107,25 +120,55 @@ export class MaterialService {
                             url,
                             url,
                             this._scene,
-                            materialConfig,
+                            materialConfigWithoutTextures,
                             textureBaseUrl,
                             useVCAO,
-                            VCAOIntensity
+                            0.1
                         );
                         await material.parseMaterialFromConfig(
                             url,
-                            materialConfig,
+                            materialConfigWithoutTextures,
                             this._scene,
                             textureBaseUrl,
                             environmentBRDFTextureUrl
                         );
+
+                        for (const textureProperty of TEXTURE_PROPERTIES) {
+                            const texture = (pbrMaterial as any)[
+                                textureProperty
+                            ] as BaseTexture;
+                            if (texture) {
+                                (material as any)[textureProperty] = texture;
+                            }
+                        }
+
+                        if (pbrMaterial.environmentBRDFTexture) {
+                            material.environmentBRDFTexture =
+                                pbrMaterial.environmentBRDFTexture;
+                        }
+
+                        const pbrDetailMap = (pbrMaterial as any).detailMap;
+                        const materialDetailMap = (material as any).detailMap;
+                        if (pbrDetailMap && materialDetailMap) {
+                            materialDetailMap.texture = pbrDetailMap.texture;
+                            materialDetailMap.isEnabled =
+                                pbrDetailMap.isEnabled;
+                            materialDetailMap.bumpLevel =
+                                pbrDetailMap.bumpLevel;
+                            materialDetailMap.normalBlendMethod =
+                                pbrDetailMap.normalBlendMethod;
+                            materialDetailMap.roughnessBlendLevel =
+                                pbrDetailMap.roughnessBlendLevel;
+                            materialDetailMap.diffuseBlendLevel =
+                                pbrDetailMap.diffuseBlendLevel;
+                        }
 
                         material.id = url;
                         material.name = url;
                         material['url'] = url;
                         material['childMaterialNames'] = [];
 
-                        pbrMaterial.dispose();
+                        pbrMaterial.dispose(false, false);
                         return material;
                     } catch (error) {
                         MVLogger.error(
