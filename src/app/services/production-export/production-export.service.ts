@@ -529,11 +529,14 @@ export class ProductionExportService {
                     p.slots = p.slots.map((p) => {
                         if (p.mapping) {
                             try {
-                                const materialPath = `${entityConfig.materialsUrlRelative}${p.mapping}`;
+                                let materialPath = `${entityConfig.materialsUrlRelative}${p.mapping}`;
 
                                 let material =
                                     entityConfig.materials[materialPath];
-                                if (!material) {
+                                if (
+                                    !material &&
+                                    materialPath.includes('.json')
+                                ) {
                                     material = (
                                         window as any
                                     ).electronAPI.fsReadJSONSync(
@@ -541,6 +544,9 @@ export class ProductionExportService {
                                     );
                                     entityConfig.materials[materialPath] =
                                         material;
+                                }
+                                if (p.mapping.includes('.glb')) {
+                                    materialPath = p.mapping;
                                 }
                                 p.mapping = materialPath;
                             } catch (error) {
