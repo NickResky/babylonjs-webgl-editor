@@ -91,9 +91,17 @@ export class MaterialService {
             result.meshes.forEach((mesh) => mesh.dispose());
 
             const glb_name = url.split('/').pop().split('.')[0];
-            const loadedMaterial = this.getMaterial(glb_name);
+            let loadedMaterial = this.getMaterial(glb_name);
+            if (!loadedMaterial) {
+                loadedMaterial = this.getMaterial(
+                    glb_name.replace('_unlit', '')
+                );
+            }
             if (loadedMaterial) {
                 const pbrMaterial = loadedMaterial as PBRMaterial;
+                if (url.includes('unlit')) {
+                    pbrMaterial.unlit = true;
+                }
 
                 if (false && pbrMaterial instanceof PBRMaterial) {
                     try {

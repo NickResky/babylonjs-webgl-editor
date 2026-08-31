@@ -928,6 +928,9 @@ export class EntityService {
                     layer.addMesh(m);
                     m.useVertexColors = false;
                     if (m.material) {
+                        if (m.material.name.includes('.')) {
+                            m.material.name = m.material.name.split('.')[0];
+                        }
                         m.useVertexColors = false;
                         // this._scene.addMaterial(m.material);
                     }
