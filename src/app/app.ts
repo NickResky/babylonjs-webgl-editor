@@ -74,6 +74,9 @@ export class App {
         (window as any).electronAPI.onOpenNewEntityFile(() => {
             this.onLoadNewEntity();
         });
+        (window as any).electronAPI.onOpenGLBFile(() => {
+            this.onLoadGLBFile();
+        });
         // ipcRenderer.on('open-new-production-entity-file', (e) => {
         //   this.onLoadNewEntity(true);
         // });
@@ -110,6 +113,11 @@ export class App {
 
     private onLoadNewEntity(productionMode?: boolean) {
         this.openEntityFileSelector(productionMode);
+        this.loadEntityConfig();
+    }
+
+    private onLoadGLBFile() {
+        this.openGLBFileSelector();
     }
 
     private async loadEntityConfig() {
@@ -135,6 +143,19 @@ export class App {
         } else {
             this.openEntityFileSelector();
         }
+    }
+
+    public async openGLBFileSelector(): Promise<void> {
+        const openDialogOptions = {
+            title: 'Open GLB File',
+            filters: [{ name: 'GLB', extensions: ['glb'] }]
+        };
+        const result = await (window as any).electronAPI.showOpenDialogSync(
+            openDialogOptions
+        );
+        console.log(result);
+        const glbFilePath = result[0];
+        this.dataService.setGlbFilePath(glbFilePath);
     }
 
     public async openEntityFileSelector(

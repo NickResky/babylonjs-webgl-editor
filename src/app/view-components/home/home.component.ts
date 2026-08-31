@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
-import { AppendSceneAsync, DebugLayer, Engine, Scene } from 'babylonjs';
+import {
+    AppendSceneAsync,
+    DebugLayer,
+    Engine,
+    Scene,
+    SceneLoader
+} from 'babylonjs';
 // import '@babylonjs/loaders';
 // import '@babylonjs/loaders/glTF/2.0/Extensions/KHR_draco_mesh_compression';
 // import '@babylonjs/loaders/glTF';
@@ -97,6 +103,50 @@ export class HomeComponent implements AfterViewInit {
                 this.setup();
             }
         );
+
+        this.dataService.glbFilePath$.subscribe(async (glbFilePath: string) => {
+            if (this.core) {
+                this.resetCore();
+            }
+            const baseResolver = new BaseResolver();
+
+            if (!this.canvasContainerWrapper) return;
+
+            this.core = new Core(
+                this.canvasContainerWrapper.nativeElement,
+                (entity: MVEntity): BaseResolver => {
+                    // if (entity.entityConfig.cwsId) return new CWSV1AndLocalResolver();
+
+                    return baseResolver;
+                },
+                {
+                    assetsBaseUrl: this._projectSettings?.baseProjectUrl, //'http://127.0.0.1:5500/',
+                    // assetsBaseUrl: 'C:/Code/webgl-assets-stratus/',
+                    productionMode: this._productionMode,
+                    antiAliasingSettings: {
+                        fxaaEnabled: true,
+                        samplesOnRotation: 1,
+                        samplesOnStill: 7,
+                        automaticOptimization: 2,
+                        automaticOptimizationStep: 0.2,
+                        optimizationTargetFrameRate: 20,
+                        fxTargetFrameRate: 3,
+                        hardwareScalingMinimum: 0.5,
+                        hardwareScalingMaximum: 1
+                    }
+                }
+            );
+            // Append into the Core scene, otherwise the loaded content is not rendered in the viewport
+            this.scene = this.core.getScene();
+            await AppendSceneAsync(glbFilePath, this.scene);
+
+            if (!this.scene.activeCamera) {
+                this.scene.createDefaultCameraOrLight(true, true, true);
+                this.scene.activeCamera?.attachControl(this.core._canvas, true);
+            }
+
+            await this.postSetup();
+        });
         // this.setup();
         // this.dataService.reloadScene$.subscribe(() => {
         //   // TODO
@@ -189,6 +239,10 @@ export class HomeComponent implements AfterViewInit {
         // // TODO only necessary until mobile and non mobile cameas are loaded togther in product controller
         await this.cameraService.requestDefaultCameraShot();
 
+        await this.postSetup();
+    }
+
+    async postSetup() {
         this.setupKeyPressEvents(this.core._canvas);
 
         DebugLayer.InspectorURL = 'babylon.inspector.bundle.max.8.0.0.js';
@@ -290,7 +344,9 @@ export class HomeComponent implements AfterViewInit {
                     break;
                 }
                 case 'F3': {
-                    this.saveMaterialsAndCreateAllocators();
+                    this.saveMaterialsAndCreateAllocators(
+                        'materials/automotive'
+                    );
                     break;
                 }
                 // case 'KeyO': {
@@ -349,12 +405,12 @@ export class HomeComponent implements AfterViewInit {
         });
     }
 
-    async saveMaterialsAndCreateAllocators() {
+    async saveMaterialsAndCreateAllocators(basePath: string) {
         console.log('saveMaterialsAndCreateAllocators');
         this.scene?.materials.forEach((m) => {
             if (m.name.includes('.json') || m.name.includes('/')) return;
 
-            const path = `materials/automotive/${m.name.replace('MI_GLTF_', '')}.json`;
+            const path = `${basePath}/${m.name.replace('MI_GLTF_', '')}.json`;
             this.materialService.updateMaterial(
                 this._projectSettings.baseProjectUrl,
                 path,

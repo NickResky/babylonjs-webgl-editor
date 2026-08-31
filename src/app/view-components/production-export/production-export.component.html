@@ -11,6 +11,46 @@
     >
         Production build failed! Please check the console.
     </div>
+    <div class="">
+        <button
+            style="margin-top: 20px"
+            mat-raised-button
+            (click)="exportMaterialsAsGlb()"
+            [disabled]="materialExportInProgress"
+        >
+            Export Scene materials as GLB
+        </button>
+    </div>
+    <div
+        *ngIf="materialExportInProgress"
+        style="display: flex; align-items: center; margin-top: 20px"
+    >
+        <div style="position: relative; height: 60px; width: 60px">
+            <div class="loader-container">
+                <div class="loader">
+                    <div class="lds-ring">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-left: 20px">Material export is running</div>
+    </div>
+    <div
+        style="color: rgb(15, 155, 241); font-weight: 600; margin-top: 20px"
+        *ngIf="materialExportSuccessful"
+    >
+        Material export complete!
+    </div>
+    <div
+        style="color: red; font-weight: 600; margin-top: 20px"
+        *ngIf="materialExportFailed"
+    >
+        Material export failed! Please check the console.
+    </div>
     <div *ngIf="!blenderPath">
         <div>
             Please download Blender version

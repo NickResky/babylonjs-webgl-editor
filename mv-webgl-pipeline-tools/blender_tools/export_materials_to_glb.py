@@ -51,7 +51,11 @@ def export_material_to_glb(material: bpy.types.Material, output_path: Path, size
 	obj = bpy.data.objects.new(name=f"OBJ_{material.name}", object_data=mesh)
 
 	bm_handle = bmesh.new()
-	bmesh.ops.create_uvsphere(bm_handle, u_segments=32, v_segments=16, radius=size)
+	# Blender <3.0 uses "diameter" (as a radius value), newer versions use "radius".
+	try:
+		bmesh.ops.create_uvsphere(bm_handle, u_segments=32, v_segments=16, radius=size)
+	except TypeError:
+		bmesh.ops.create_uvsphere(bm_handle, u_segments=32, v_segments=16, diameter=size)
 	bm_handle.to_mesh(mesh)
 	bm_handle.free()
 	mesh.update()
@@ -67,7 +71,7 @@ def export_material_to_glb(material: bpy.types.Material, output_path: Path, size
 	bpy.context.view_layer.objects.active = obj
 
 	try:
-		bpy.ops.export_scene.gltf(
+		export_options = dict(
 			filepath=str(output_path),
 			export_format="GLB",
 			use_selection=True,
@@ -78,6 +82,13 @@ def export_material_to_glb(material: bpy.types.Material, output_path: Path, size
 			export_materials="EXPORT",
 			export_image_format="AUTO",
 		)
+		try:
+			bpy.ops.export_scene.gltf(**export_options)
+		except TypeError:
+			# Older Blender versions expose a reduced/renamed option set.
+			export_options.pop("export_materials", None)
+			export_options.pop("export_image_format", None)
+			bpy.ops.export_scene.gltf(**export_options)
 		return True
 	except Exception as exc:
 		print(f"[ERROR] Failed to export '{material.name}': {exc}")

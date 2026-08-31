@@ -7,6 +7,7 @@ const {
     ipcMain
 } = require('electron');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const args = process.argv;
 console.log('ARGS');
@@ -27,6 +28,12 @@ const menuTemplate = [
                 label: 'Open new Production Entity-File',
                 click: () => {
                     win.webContents.send('open-new-production-entity-file');
+                }
+            },
+            {
+                label: 'Open GLB file',
+                click: () => {
+                    win.webContents.send('open-glb-file');
                 }
             }
             // {
@@ -77,6 +84,27 @@ function handleIcp() {
 
     ipcMain.handle('app:getUserDataPath', () => {
         return app.getPath('userData');
+    });
+
+    ipcMain.handle('process:run', async (event, command, args) => {
+        return new Promise((resolve) => {
+            let child;
+            try {
+                child = spawn(command, args, { windowsHide: true });
+            } catch (error) {
+                resolve({ code: -1, output: String(error) });
+                return;
+            }
+
+            let output = '';
+            child.stdout.on('data', (data) => (output += data.toString()));
+            child.stderr.on('data', (data) => (output += data.toString()));
+            child.on('error', (error) => {
+                output += String(error);
+                resolve({ code: -1, output });
+            });
+            child.on('close', (code) => resolve({ code, output }));
+        });
     });
 
     ipcMain.handle('app:getAppBasePath', () => {

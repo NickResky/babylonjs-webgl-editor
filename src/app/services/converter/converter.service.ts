@@ -214,6 +214,46 @@ export class ConverterService {
         return nodePath;
     }
 
+    async exportMaterialsAsGlb(
+        inputFile: string,
+        outputDirectory: string
+    ): Promise<boolean> {
+        if (!this._blenderPath) {
+            this._log$.next('No blender.exe selected');
+            return false;
+        }
+
+        const basepath = await this.getAppBasePath();
+        const script =
+            basepath +
+            'mv-webgl-pipeline-tools/blender_tools/export_materials_to_glb.py';
+
+        this._log$.next('Exporting materials as glb files');
+
+        const result = await (window as any).electronAPI.runProcess(
+            this._blenderPath,
+            [
+                '-b',
+                '-P',
+                script,
+                '--',
+                '--input',
+                inputFile,
+                '--out',
+                outputDirectory
+            ]
+        );
+
+        console.log(result.output);
+        this._log$.next(
+            result.code === 0
+                ? 'Material export complete'
+                : 'Material export failed'
+        );
+
+        return result.code === 0;
+    }
+
     async runGlbConversion(
         options: ConversionConfigJSON
     ): Promise<ConversionStatus> {

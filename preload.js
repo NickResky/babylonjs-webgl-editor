@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     path: () => path,
     onOpenNewEntityFile: (callback) =>
         ipcRenderer.on('open-new-entity-file', callback),
+    onOpenGLBFile: (callback) =>
+        ipcRenderer.on('open-glb-file', callback),
     showSaveDialogSync: (options) =>
         ipcRenderer.invoke('dialog:showSaveDialogSync', options),
     showOpenDialogSync: (options) =>
@@ -20,6 +22,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
             stdio: ['ignore', 'pipe', process.stderr]
         }),
     chunksToLinesAsync: (readable) => chunksToLinesAsync(readable),
+    runProcess: (command, args) =>
+        ipcRenderer.invoke('process:run', command, args),
     readlineCreateInterface: (options) => readline.createInterface(options),
     getUserDataPath: () => ipcRenderer.invoke('app:getUserDataPath'),
     getAppBasePath: () => ipcRenderer.invoke('app:getAppBasePath'),
