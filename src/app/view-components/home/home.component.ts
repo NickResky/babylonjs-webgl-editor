@@ -207,7 +207,9 @@ export class HomeComponent implements AfterViewInit {
         // load environment
         this.environmentService.setup(this.core);
         // await this.entityService.updateLightmapRegistryJSON();
-        // await this.entityService.updateGlbFileRegistryJSON(this.entityConfigFile);
+        await this.entityService.updateGlbFileRegistryJSON(
+            this.entityConfigFile
+        );
         // // load product
         this.entityService.setup(this.core);
         const environmentEntityConfigUrl =

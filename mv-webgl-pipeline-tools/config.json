@@ -1,7 +1,7 @@
 {
   "blenderPath": "C:/Tools/blender-2.92.0-windows64/blender-2.92.0-windows64/blender.exe",
   "inputDirectory": "C:/Users/LocalAdminMHP/OneDrive - mhp-group.com/webgl-assets-stratus/cars/suv/meshes/",
-  "outputDirectory": "C:/Users/LocalAdminMHP/OneDrive - mhp-group.com/webgl-assets-stratus//_EXPORT_/2026-01-21_21-46-58/cars/suv/meshes/",
+  "outputDirectory": "C:/Users/LocalAdminMHP/OneDrive - mhp-group.com/webgl-assets-stratus//_EXPORT_/2026-09-01_13-28-24/cars/suv/meshes/",
   "assetsBaseUrl": "C:/Users/LocalAdminMHP/OneDrive - mhp-group.com/webgl-assets-stratus/",
   "entityConfigFile": "suv_entity_config.json",
   "productionBuild": true,
@@ -10,6 +10,6 @@
   "runBlenderInBackground": true,
   "tmpPath": "C:/Code/babylonjs-webgl-editor//mv-webgl-pipeline-tools/_tmp/",
   "blenderToolsPath": "C:/Code/babylonjs-webgl-editor//mv-webgl-pipeline-tools/blender_tools/",
-  "outputMeshSettingsUrl": "C:/Users/LocalAdminMHP/OneDrive - mhp-group.com/webgl-assets-stratus//_EXPORT_/2026-01-21_21-46-58/cars/suv/mesh_settings.json",
+  "outputMeshSettingsUrl": "C:/Users/LocalAdminMHP/OneDrive - mhp-group.com/webgl-assets-stratus//_EXPORT_/2026-09-01_13-28-24/cars/suv/mesh_settings.json",
   "glbMetaDataUrl": "C:/Users/LocalAdminMHP/OneDrive - mhp-group.com/webgl-assets-stratus/cars/suv/meshes//glbFileMetaData.json"
 }
