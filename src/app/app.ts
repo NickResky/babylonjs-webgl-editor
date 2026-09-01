@@ -111,9 +111,8 @@ export class App {
         });
     }
 
-    private onLoadNewEntity(productionMode?: boolean) {
-        this.openEntityFileSelector(productionMode);
-        this.loadEntityConfig();
+    private async onLoadNewEntity(productionMode?: boolean) {
+        await this.openEntityFileSelector(productionMode);
     }
 
     private onLoadGLBFile() {
