@@ -354,7 +354,8 @@ export class Core {
         this._startedRendering = true;
 
         this._engine.runRenderLoop(() => {
-            this.render$.next();
+            this._scene.render();
+            // this.render$.next();
         });
         if (!document.hidden) {
             await removeScreenshot(options);
@@ -363,13 +364,16 @@ export class Core {
     /**
      * Stop the render loop
      */
-    public async stopRender(): Promise<void> {
-        // this._engine.stopRenderLoop();
+    public async stopRender(stopLoop?: boolean): Promise<void> {
+        // screenshot capture needs an active render loop to produce a frame, so stop the loop afterwards
         await takeScreenshot(
             this._engine,
             this.Camera.getActiveCamera(),
             this._startedRendering
         );
+        if (stopLoop) {
+            this._engine.stopRenderLoop();
+        }
     }
 
     /**

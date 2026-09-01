@@ -62,7 +62,7 @@ export class EnvironmentsEditorComponent implements OnInit {
 
     async changeEnvironment(environment: string) {
         this.selectedEnvironment =
-            await this.environmentService.selectEnvironment(environment);
+            await this.environmentService.selectEnvironment(environment, true);
         // if( this.selectedEnvironmentConfigCode ) {
         //   await this.environmentService.selectEnvironmentConfig(this.selectedEnvironmentConfigCode);
         // }
